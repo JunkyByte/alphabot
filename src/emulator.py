@@ -79,6 +79,7 @@ class Game():
 
     def replay_game():
         # TODO: Must return array of 'frames' which are the map step by step (Use self.history)
+        return
 
 if __name__ == '__main__':
     p = 3
