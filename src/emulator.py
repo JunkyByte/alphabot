@@ -49,6 +49,9 @@ class Game():
         def compute_direction(direction):
             return self.dir_vect[self.dir_name[direction]]
 
+        # Create reward vector
+        reward = np.zeros((self.players_alive))
+
         # Convert action to same length as total players
         actions = np.full((self.n_players), fill_value=-1)
         for idx, point in enumerate(np.where(self.players_alive == 1)):
@@ -66,11 +69,14 @@ class Game():
             # verify if any player died
             if self.map[self.history[idx][-1]] != null_map: # Default map value is empty
                 self.players_alive[idx] = 0 # Ouch! idx died!
+                reward[idx] -= -1 # Negative reward to idx for dying
+                reward[self.map[self.history[idx][-1]]] += 1 # Positive reward for the killer
 
             # Our true warriors get updated on the map!
             self.map[self.history[idx][-1]] = idx
 
-        return self.players_alive, self.count_alive() # TODO: Implement
+        # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
+        return self.map, self.players_alive, self.count_alive()
 
 
     def show(self):
@@ -80,6 +86,9 @@ class Game():
     def replay_game():
         # TODO: Must return array of 'frames' which are the map step by step (Use self.history)
         return
+
+    def mirror_game(v, h):
+
 
 if __name__ == '__main__':
     p = 3
