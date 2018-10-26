@@ -35,6 +35,16 @@ class Game():
 
     def count_alive(self):
         return sum(self.players_alive == 1)
+        
+    def check_game_end(self):
+        if self.count_alive() == 1:
+            return True
+        return False
+        
+    def assign_win(self, rewards):
+        assert self.count_alive() == 1
+        rewards[np.where(rewards >= 0)] += 1 # Assign reward to the alive player
+        return rewards
 
     def sanitize_positions(self, idx):
         def r_div(n):
@@ -50,7 +60,7 @@ class Game():
             return self.dir_vect[self.dir_name[direction]]
 
         # Create reward vector
-        reward = np.zeros((self.players_alive))
+        reward = np.zeros((self.count_alive()))
 
         # Convert action to same length as total players
         actions = np.full((self.n_players), fill_value=-1)
@@ -63,31 +73,43 @@ class Game():
 
             # Compute new position for each player alive
             direction = compute_direction(action)
-            self.history[idx].append(tuple(map(sum, zip(self.history[idx][-1], direction))))
+            self.history[idx].append(emulator_utils.sum_tuple(self.history[idx][-1], direction))
             self.sanitize_positions(idx)
 
             # verify if any player died
             if self.map[self.history[idx][-1]] != null_map: # Default map value is empty
                 self.players_alive[idx] = 0 # Ouch! idx died!
-                reward[idx] -= -1 # Negative reward to idx for dying
-                reward[self.map[self.history[idx][-1]]] += 1 # Positive reward for the killer
+                reward[idx] += -1 # Negative reward to idx for dying
+                if self.map[self.history[idx][-1]] != idx: # Check if is a suicide
+                    reward[self.map[self.history[idx][-1]]] += 0.5 # Positive reward for the killer
+                if self.check_game_end(): # If game ended just break the updating
+                    break
 
+                continue # Go to next player as this one doesn't need to be rendered
+                
             # Our true warriors get updated on the map!
             self.map[self.history[idx][-1]] = idx
-
+            
+        game_ended = self.check_game_end()
+        if game_ended:
+            reward = self.assign_win(reward) # Will return the reward vector with added win
+        
         # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
-        return self.map, self.players_alive, self.count_alive()
+        return self.map, self.players_alive, self.count_alive(), reward, game_ended
 
 
     def show(self):
         print(self.map)
         print(''.join('-' for _ in range(self.MAP_SIZE * 3)))
 
-    def replay_game():
+
+    def replay_game(self):
         # TODO: Must return array of 'frames' which are the map step by step (Use self.history)
         return
-
-    def mirror_game(v, h):
+    
+    def flip_game(self, v):
+        # Flips the game based on v and returns the flipped history
+        return emulator_utils.flip_game(self.history, v) 
 
 
 if __name__ == '__main__':
@@ -99,8 +121,11 @@ if __name__ == '__main__':
     for i in range(25):
         print('Step', i)
         actions = np.random.randint(0, 3, size=n_alive) # Actions of alive bots!
-        p_alive, n_alive = g.step(actions)
-        if n_alive == 0:
+        map, p_alive, n_alive, rewards, game_end = g.step(actions)
+        print(p_alive)
+        print(rewards)
+        if game_end:
             break
-
+            
     g.show()
+    g.flip_game((-1, 1))
