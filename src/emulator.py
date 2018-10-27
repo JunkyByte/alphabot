@@ -1,6 +1,8 @@
 import numpy as np
 import emulator_utils
-
+import emulator_vis
+import editor
+print(editor.get_path())
 null_map = -1
 
 # Define Map Params
@@ -70,18 +72,19 @@ class Game():
         for idx, action in enumerate(actions): # Iterate through each player action
             if action == -1: # Dead players
                 continue
-
+            print(action, idx)
             # Compute new position for each player alive
             direction = compute_direction(action)
             self.history[idx].append(emulator_utils.sum_tuple(self.history[idx][-1], direction))
             self.sanitize_positions(idx)
 
             # verify if any player died
-            if self.map[self.history[idx][-1]] != null_map: # Default map value is empty
+            point = self.map[self.history[idx][-1]]
+            if point != null_map: # Default map value is empty
                 self.players_alive[idx] = 0 # Ouch! idx died!
                 reward[idx] += -1 # Negative reward to idx for dying
-                if self.map[self.history[idx][-1]] != idx: # Check if is a suicide
-                    reward[self.map[self.history[idx][-1]]] += 0.5 # Positive reward for the killer
+                #if point != idx: # Check if is a suicide 
+                    #reward[self.map[self.history[idx][-1]]] += 0.5 # Positive reward for the killer
                 if self.check_game_end(): # If game ended just break the updating
                     break
 
@@ -128,4 +131,8 @@ if __name__ == '__main__':
             break
             
     g.show()
-    g.flip_game((-1, 1))
+    print('Flipped')
+    h_f = g.flip_game((1, 1))
+    print(emulator_utils.h_to_map(h_f, 10))
+    
+    emulator_vis.plot_map(map)

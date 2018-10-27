@@ -29,6 +29,21 @@ def flip_game(history, v):
             # Flip the position based on v (our flip vectors)
             history[player][idx] = mul_tuple(history[player][idx], v)
     return history
+    
+def h_to_map(history, step):
+    assert type(step) == type(int())
+    # Now let's compute the map at instant step
+    n_players = len(history.keys()) # Infer number of players
+    MAP_SIZE = get_map_size(n_players)
+    map = np.full((MAP_SIZE, MAP_SIZE), fill_value=-1, dtype=np.int) # -1 is null map and should be globally def.
+    
+    for player, positions in history.items():
+        for i in range(step + 1): # For each step up to step
+            try:
+                map[history[player][i]] = player
+            except:
+                break
+    return map
 
 
 def delta_move(old_pos, new_pos, dir_vector, dir_names): # Two consecutive positions and the dir_vector used

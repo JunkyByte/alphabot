@@ -4,32 +4,31 @@ import numpy as np
 from time import sleep
 import emulator_utils
 
-## TODO
 
-# Define MAP
-PLAYERS = 2
-MAP_SIZE = emulator_utils.get_map_size(PLAYERS)
-map = np.empty(())
-data = np.random.rand(10, 10) * 20
+# Set interactive mode
+#plt.ion()
 
-plt.ion()
-
-def get_cmap(n, name='hsv'):
+def get_cmap(n, name='brg'):
     return plt.cm.get_cmap(name, n)
 
-cmap = get_cmap(10)
-bounds = [0, 1, 2, 10, 20]
-norm = colors.BoundaryNorm(bounds, 10)
-
-fig, ax = plt.subplots()
-
-# draw gridlines
-ax.grid(which='major', axis='both', linestyle='-', color='k', linewidth=2)
-ax.set_xticks(np.arange(-.5, 10, 1));
-ax.set_yticks(np.arange(-.5, 10, 1));
-
-while True:
-    data = np.random.rand(10, 10) * 20
-    ax.imshow(data, cmap=cmap, norm=norm)
-    fig.canvas.draw()
-    plt.pause(1)
+def plot_map(map):
+    n_players = len(np.unique(map)) - 1
+    cmap = get_cmap(n_players)
+    
+    #bounds = np.arange(n_players)
+    bounds = [-1.1, -0.9, 2, 3] # Todo
+    norm = colors.BoundaryNorm(bounds, n_players)
+    
+    fig, ax = plt.subplots()
+    
+    # draw gridlines
+    ax.grid(which='major', axis='both', linestyle='--', color='k', linewidth=1)
+    ax.set_xticks(np.arange(-map.shape[0], map.shape[1], 1));
+    ax.set_yticks(np.arange(-map.shape[0], map.shape[1], 1));
+    
+    #while True:
+    #    data = np.random.rand(10, 10) * 20
+    ax.imshow(map, cmap=cmap, norm=norm)
+    #fig.canvas.draw()
+    #plt.pause(1)
+    plt.show()
