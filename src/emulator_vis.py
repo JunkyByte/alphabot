@@ -16,19 +16,19 @@ def plot_map(map):
     cmap = get_cmap(n_players)
     
     #bounds = np.arange(n_players)
-    bounds = [-1.1, -0.9, 2, 3] # Todo
+    bounds = [-1.1, -0.9, -0.1, 0.1] # Todo
     norm = colors.BoundaryNorm(bounds, n_players)
     
     fig, ax = plt.subplots()
     
     # draw gridlines
-    ax.grid(which='major', axis='both', linestyle='--', color='k', linewidth=1)
+    #ax.grid(which='major', axis='both', linestyle='--', color='k', linewidth=0.1)
     ax.set_xticks(np.arange(-map.shape[0], map.shape[1], 1));
     ax.set_yticks(np.arange(-map.shape[0], map.shape[1], 1));
     
     #while True:
     #    data = np.random.rand(10, 10) * 20
-    ax.imshow(map, cmap=cmap, norm=norm)
-    #fig.canvas.draw()
-    #plt.pause(1)
-    plt.show()
+    from PIL import Image
+    img = Image.fromarray(map)
+    img.resize((368,368))
+    img.show()

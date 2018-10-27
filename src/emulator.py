@@ -133,6 +133,6 @@ if __name__ == '__main__':
     g.show()
     print('Flipped')
     h_f = g.flip_game((1, 1))
-    print(emulator_utils.h_to_map(h_f, 10))
+    print(emulator_utils.h_to_map(h_f, 5))
     
     emulator_vis.plot_map(map)
