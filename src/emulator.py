@@ -1,8 +1,6 @@
 import numpy as np
 import emulator_utils
 import emulator_vis
-import editor
-print(editor.get_path())
 null_map = -1
 
 # Define Map Params
@@ -37,15 +35,16 @@ class Game():
 
     def count_alive(self):
         return sum(self.players_alive == 1)
-        
+
     def check_game_end(self):
         if self.count_alive() == 1:
             return True
         return False
-        
+
     def assign_win(self, rewards):
         assert self.count_alive() == 1
-        rewards[np.where(rewards >= 0)] += 1 # Assign reward to the alive player
+        print(self.players_alive)
+        rewards[np.where(self.players_alive == 1)] += 1 # Assign reward to the alive player
         return rewards
 
     def sanitize_positions(self, idx):
@@ -62,17 +61,17 @@ class Game():
             return self.dir_vect[self.dir_name[direction]]
 
         # Create reward vector
-        reward = np.zeros((self.count_alive()))
+        reward = np.zeros((self.n_players))
 
         # Convert action to same length as total players
         actions = np.full((self.n_players), fill_value=-1)
-        for idx, point in enumerate(np.where(self.players_alive == 1)):
+        for idx, point in enumerate(np.where(self.players_alive == 1)[0]):
             actions[point] = alive_actions[idx]
 
         for idx, action in enumerate(actions): # Iterate through each player action
             if action == -1: # Dead players
                 continue
-            print(action, idx)
+
             # Compute new position for each player alive
             direction = compute_direction(action)
             self.history[idx].append(emulator_utils.sum_tuple(self.history[idx][-1], direction))
@@ -83,20 +82,19 @@ class Game():
             if point != null_map: # Default map value is empty
                 self.players_alive[idx] = 0 # Ouch! idx died!
                 reward[idx] += -1 # Negative reward to idx for dying
-                #if point != idx: # Check if is a suicide 
+                #if point != idx: # Check if is a suicide
                     #reward[self.map[self.history[idx][-1]]] += 0.5 # Positive reward for the killer
-                if self.check_game_end(): # If game ended just break the updating
+                if self.check_game_end():
                     break
 
                 continue # Go to next player as this one doesn't need to be rendered
-                
             # Our true warriors get updated on the map!
             self.map[self.history[idx][-1]] = idx
-            
+
         game_ended = self.check_game_end()
         if game_ended:
             reward = self.assign_win(reward) # Will return the reward vector with added win
-        
+
         # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
         return self.map, self.players_alive, self.count_alive(), reward, game_ended
 
@@ -109,10 +107,10 @@ class Game():
     def replay_game(self):
         # TODO: Must return array of 'frames' which are the map step by step (Use self.history)
         return
-    
+
     def flip_game(self, v):
         # Flips the game based on v and returns the flipped history
-        return emulator_utils.flip_game(self.history, v) 
+        return emulator_utils.flip_game(self.history, v)
 
 
 if __name__ == '__main__':
@@ -123,16 +121,16 @@ if __name__ == '__main__':
 
     for i in range(25):
         print('Step', i)
-        actions = np.random.randint(0, 3, size=n_alive) # Actions of alive bots!
+        actions = np.random.randint(0, 3, (n_alive,)) # Actions of alive bots!
         map, p_alive, n_alive, rewards, game_end = g.step(actions)
-        print(p_alive)
-        print(rewards)
+        #emulator_vis.plot_map(map)
+        print('P Alive', n_alive, ':', p_alive)
+        print('Rewards', rewards)
+        print('Game End', game_end)
         if game_end:
             break
-            
-    g.show()
-    print('Flipped')
+
+    #g.show()
+    #print('Flipped')
     h_f = g.flip_game((1, 1))
-    print(emulator_utils.h_to_map(h_f, 5))
-    
-    emulator_vis.plot_map(map)
+    #print(emulator_utils.h_to_map(h_f, 100))
