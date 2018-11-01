@@ -1,6 +1,7 @@
 import numpy as np
 import emulator_utils
 import emulator_vis
+from copy import copy
 null_map = -1
 
 # Define Map Params
@@ -43,7 +44,6 @@ class Game():
 
     def assign_win(self, rewards):
         assert self.count_alive() == 1
-        print(self.players_alive)
         rewards[np.where(self.players_alive == 1)] += 1 # Assign reward to the alive player
         return rewards
 
@@ -59,7 +59,10 @@ class Game():
         assert min(alive_actions) >= -1 and max(alive_actions) <= 3 # dead player action is -1, [0;3] allowed movements
         def compute_direction(direction):
             return self.dir_vect[self.dir_name[direction]]
-
+        
+        # Save players that are alive
+        alive_on_start = copy(self.players_alive)
+        
         # Create reward vector
         reward = np.zeros((self.n_players))
 
@@ -94,7 +97,8 @@ class Game():
         game_ended = self.check_game_end()
         if game_ended:
             reward = self.assign_win(reward) # Will return the reward vector with added win
-
+        
+        reward = reward[np.where(alive_on_start == 1)]
         # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
         return self.map, self.players_alive, self.count_alive(), reward, game_ended
 
