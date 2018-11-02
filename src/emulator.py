@@ -59,10 +59,10 @@ class Game():
         assert min(alive_actions) >= -1 and max(alive_actions) <= 3 # dead player action is -1, [0;3] allowed movements
         def compute_direction(direction):
             return self.dir_vect[self.dir_name[direction]]
-        
+
         # Save players that are alive
         alive_on_start = copy(self.players_alive)
-        
+
         # Create reward vector
         reward = np.zeros((self.n_players))
 
@@ -97,7 +97,7 @@ class Game():
         game_ended = self.check_game_end()
         if game_ended:
             reward = self.assign_win(reward) # Will return the reward vector with added win
-        
+
         reward = reward[np.where(alive_on_start == 1)]
         # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
         return self.map, self.players_alive, self.count_alive(), reward, game_ended
@@ -123,10 +123,12 @@ if __name__ == '__main__':
     g.show()
     n_alive = p
 
-    for i in range(25):
+    i = 0
+    while True:
         print('Step', i)
+        i+=1
         actions = np.random.randint(0, 3, (n_alive,)) # Actions of alive bots!
-        map, p_alive, n_alive, rewards, game_end = g.step(actions)
+        gmap, p_alive, n_alive, rewards, game_end = g.step(actions)
         #emulator_vis.plot_map(map)
         print('P Alive', n_alive, ':', p_alive)
         print('Rewards', rewards)
@@ -134,7 +136,8 @@ if __name__ == '__main__':
         if game_end:
             break
 
+    print(gmap)
     #g.show()
     #print('Flipped')
-    h_f = g.flip_game((1, 1))
+    #h_f = g.flip_game((1, 1))
     #print(emulator_utils.h_to_map(h_f, 100))
