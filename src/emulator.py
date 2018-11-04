@@ -33,6 +33,7 @@ class Game():
 
     def reset(self):
         self.__init__(self.n_players)
+        return self.map
 
     def count_alive(self):
         return sum(self.players_alive == 1)
