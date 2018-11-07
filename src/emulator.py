@@ -16,11 +16,16 @@ class Game():
         self.dir_name = {0 : 'right', 1 : 'down', 2 : 'left', 3 : 'up'}
         self.dir_vect = {'right' : (0, 1), 'down' : (1, 0), 'left' : (0, -1), 'up' : (-1, 0)}
 
+    def nobody_around(position):
+        x, y = position
+        return self.map[x, y] == self.map[x, y + 1] == self.map[x, y - 1] == self.map[x + 1, y] == self.map[x + 1, y + 1] == \
+        self.map[x + 1, y - 1] == self.map[x - 1, y] == self.map[x - 1, y + 1] == self.map[x - 1, y - 1]
+
     def init_players(self):
         def random_position():
             while True:
                 position = tuple(np.random.randint(0, self.MAP_SIZE - 2, size=2))
-                if self.map[position] == null_map:
+                if self.map[position] == null_map and nobody_around(position):
                     return position
 
         history = {}
