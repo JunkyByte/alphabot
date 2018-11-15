@@ -93,20 +93,21 @@ class Game():
                 reward[idx] += -1 # Negative reward to idx for dying
                 #if point != idx: # Check if is a suicide
                     #reward[self.map[self.history[idx][-1]]] += 0.5 # Positive reward for the killer
-                if self.check_game_end():
-                    break
-
                 continue # Go to next player as this one doesn't need to be rendered
             # Our true warriors get updated on the map!
             self.map[self.history[idx][-1]] = idx
 
-        game_ended = self.check_game_end()
-        if game_ended:
-            reward = self.assign_win(reward) # Will return the reward vector with added win
+        if self.count_alive() == 0: # Both lost case (they play simultaneously this way)
+            reward = reward[np.where(alive_on_start == 1)]
+            return self.map, self.players_alive, self.count_alive(), reward, True
 
-        reward = reward[np.where(alive_on_start == 1)]
-        # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
-        return self.map, self.players_alive, self.count_alive(), reward, game_ended
+        else:
+            game_ended = self.check_game_end()
+            if game_ended:
+                reward = self.assign_win(reward) # Will return the reward vector with added win
+            reward = reward[np.where(alive_on_start == 1)]
+            # Returns State, list of alive, number of alive, reward for each player (that was alive), game end
+            return self.map, self.players_alive, self.count_alive(), reward, game_ended
 
 
     def show(self):
@@ -124,7 +125,7 @@ class Game():
 
 
 if __name__ == '__main__':
-    p = 3
+    p = 2
     g = Game(p)
     g.show()
     n_alive = p
