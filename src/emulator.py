@@ -49,7 +49,8 @@ class Game():
         head_channel = state[..., channel_index]
         return np.where(head_channel == 1)  # Where's the head?
 
-    def step(self, mapp, state, action):
+    def step(self, p, state, action):
+        mapp = copy(p)
 
         # We are getting the state here. last channel of it is the turn
         turn = int(state[..., -1].all() == 1)
