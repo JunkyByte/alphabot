@@ -14,7 +14,7 @@ class MCTS():
         self.N = {}
         self.alpha = 0.8
  
-    def search(self, s, mapp, game, pipe, ask_predict, process_id):
+    def search(self, s, mapp, game, pipe, ask_predict, process_id, alphabot=None):
         logging.debug('Starting search')
         s_k = to_hash(s)
         if game.game_ended():
@@ -25,10 +25,16 @@ class MCTS():
         if s_k not in self.tree:
             logging.debug('New state encountered')
             self.tree.append(s_k)
-            ask_predict(process_id, s)
-            raw_prediction = pipe.recv()
-            policy, value = raw_prediction['policy'], raw_prediction['value']
-            self.P[s_k], v = policy[0], value[0]
+            if alphabot is None:
+                ask_predict(process_id, s)
+                raw_prediction = pipe.recv()
+                policy, value = raw_prediction['policy'], raw_prediction['value']
+            else:
+                policy, value = alphabot.predict(s[np.newaxis])
+                policy = policy[0]
+                value = value[0]
+
+            self.P[s_k], v = policy, value
             self.Q[s_k] = np.zeros((4))
             self.N[s_k] = np.zeros((4))
             return -v
@@ -62,7 +68,7 @@ class MCTS():
             sp = copy.copy(s)
             sp[..., -1] = 1
         
-        v = self.search(sp, new_map, game, pipe, ask_predict, process_id)
+        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, alphabot)
         
         self.Q[s_k][a] = (self.N[s_k][a] * self.Q[s_k][a] + v) / (self.N[s_k][a] + 1)
         self.N[s_k][a] += 1
@@ -119,16 +125,16 @@ def process_map(gmap, gmap_old, state, idx):
     return np.concatenate([pov_0, pov_0_last, pov_1, pov_1_last, turn_m], axis=2)
 
 
-def do_search(n, s, mapp, game, tree, pipe, ask_predict, process_id):
+def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None, process_id=None, alphabot=None):
     for i in range(n):
-        tree.search(s, mapp, game, pipe, ask_predict, process_id)
+        tree.search(s, mapp, game, pipe, ask_predict, process_id, alphabot=alphabot)
 
     x = tree.N[to_hash(s)]
     x = x / max(sum(x), 1e-7)
     return x
 
 
-def simulate_game(steps, alpha, pipe, ask_predict, process_id):
+def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None):
     game = emulator.Game(2)
     mapp = game.reset()
 
@@ -144,7 +150,7 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id):
     policies = []
     while not game.game_ended():
         states.append(np.array(s))
-        policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id)
+        policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot)
         choosen = np.argmax(policy)
         policies.append(np.array(policy))
         mapp = game.step(mapp, s, choosen, turn)
