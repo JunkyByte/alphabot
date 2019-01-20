@@ -30,7 +30,7 @@ class MCTS():
                 raw_prediction = pipe.recv()
                 policy, value = raw_prediction['policy'], raw_prediction['value']
             else:
-                policy, value = alphabot.predict(s[np.newaxis])
+                policy, value = alphabot.predict(s.astype(np.float32)[np.newaxis])
                 policy = policy[0]
                 value = value[0]
 
