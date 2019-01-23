@@ -19,8 +19,9 @@ class MCTS():
         s_k = to_hash(s)
         if game.game_ended():
             logging.debug('Game Ended during search')
+            reward = game.reward
             game.reward = 0
-            return -1
+            return -reward
         
         if s_k not in self.tree:
             logging.debug('New state encountered')
@@ -33,37 +34,37 @@ class MCTS():
                 policy, value = alphabot.predict(s.astype(np.float32)[np.newaxis])
                 policy = policy[0]
                 value = value[0]
-
+            
+            policy = softmax(policy)[0]
             self.P[s_k], v = policy, value
             self.Q[s_k] = np.zeros((4))
             self.N[s_k] = np.zeros((4))
             return -v
         
+        turn = get_turn(mapp)
         max_u, best_a = -float('inf'), -1
+        valid_actions = game.valid_actions(mapp, s, turn)
+        if valid_actions == []:
+            best_a = np.random.randint(0, 4)
+            # return 1
+
         logging.debug('Evaluating UCB')
-        for a in range(4):  # The actions
+        for a in valid_actions:  # The actions
             u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k]) / (1 + self.N[s_k][a]))
             if u > max_u or (u == max_u and np.random.random() > 0.5):
                 max_u = u
                 best_a = a
             logging.debug('Action %d has a value of %f' % (a, u))
-        a = best_a
         
-        turn = get_turn(mapp)
+        a = best_a
         logging.debug('\n ' + str(mapp))
         new_map = copy.deepcopy(mapp)
         new_map = game.step(new_map, s, a, turn)
         turn = get_turn(new_map)
         
-        logging.debug(game.reward)
-        logging.debug('New map after move, now is turn of %d' % turn)
-        logging.debug('\n' + str(new_map))
-        
         if turn == 0:  # We update the state
-            logging.debug('Player 0 turn, updating the map')
             sp = map_to_state(new_map, mapp, s, 0)  # TODO: Map to state
         else:
-            logging.debug('Player 1 turn, not updating the map')
             # But we have to change the point of view of it!
             sp = copy.copy(s)
             sp[..., -1] = 1
@@ -74,6 +75,16 @@ class MCTS():
         self.N[s_k][a] += 1
         
         return -v
+
+
+def softmax(z):
+    z = z[np.newaxis]
+    s = np.max(z, axis=1)
+    s = s[:, np.newaxis]  # necessary step to do broadcasting
+    e_x = np.exp(z - s)
+    div = np.sum(e_x, axis=1)
+    div = div[:, np.newaxis]
+    return e_x / div
 
 
 def to_hash(state):
@@ -130,7 +141,7 @@ def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None, process_id=No
         tree.search(s, mapp, game, pipe, ask_predict, process_id, alphabot=alphabot)
 
     x = tree.N[to_hash(s)]
-    x = x / max(sum(x), 1e-7)
+    x = x / sum(x)
     return x
 
 
@@ -138,8 +149,8 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None):
     game = emulator.Game(2)
     mapp = game.reset()
 
-    tree = MCTS()
-    tree.alpha = alpha
+    # tree = MCTS()
+    # tree.alpha = alpha
 
     old_mapp = None
     turn = 0
@@ -150,8 +161,13 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None):
     policies = []
     while not game.game_ended():
         states.append(np.array(s))
+
+        tree = MCTS()
+        tree.alpha = alpha
         policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot)
-        choosen = np.argmax(policy)
+        # choosen = np.argmax(policy)
+        choosen = np.random.choice(4, p=policy)
+        logging.debug('Turn of %d Policy was %s Took action %s' % (turn, np.round(policy, 2), game.dir_name[choosen]))
         policies.append(np.array(policy))
         mapp = game.step(mapp, s, choosen, turn)
 
@@ -166,7 +182,13 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None):
         if turn == 0:
             old_mapp = np.array(mapp)
 
+        printable_mapp = copy.copy(old_mapp)
+        printable_mapp[np.where(s[..., 1] == 1)] = 2
+        printable_mapp[np.where(s[..., 3] == 1)] = 3
+        logging.debug('\n' + str(printable_mapp).replace('-1', '--'))
+        
         if game.game_ended():
+            logging.debug('Game ended %d won' % (int(not turn)))
             train_steps = divide_states(int(not turn), states, policies)
             return train_steps
 

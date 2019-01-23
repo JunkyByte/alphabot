@@ -45,6 +45,16 @@ class Game():
     def game_ended(self):
         return self.reward != 0
 
+    def valid_actions(self, mapp, state, turn):
+        head_position = self.get_head(state, turn)
+        
+        valid_actions = []
+        for i, direction in enumerate(self.dir_vect.values()):
+            pos = self.sanitize_positions(emulator_utils.sum_tuple(head_position, direction))
+            if mapp[pos] == null_map:
+                valid_actions.append(i)
+        return valid_actions
+    
     def get_head(self, state, turn):
         channel_index = 2 * turn + 1  # This is the channel where the head is located
         head_channel = state[..., channel_index]
@@ -54,7 +64,7 @@ class Game():
         mapp = copy(p)
 
         # We are getting the state here. last channel of it is the turn
-        #turn = int(state[..., -1].all() == 1)
+        # turn = int(state[..., -1].all() == 1)
         head_position = self.get_head(state, turn)
 
         def compute_direction(direction):
@@ -64,11 +74,10 @@ class Game():
         new_position = self.sanitize_positions(emulator_utils.sum_tuple(head_position, direction))
 
         point = mapp[new_position]
-        #print(point, direction, new_position, head_position)
+        # print(point, direction, new_position, head_position)
         if point != null_map:
-            self.reward = -1  # Game ended
+            self.reward = 1  # Game ended
         else:  # We have to update the mapp
-            #print('Updating map')
             mapp[new_position] = turn
 
         return mapp
