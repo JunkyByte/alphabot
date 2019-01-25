@@ -14,17 +14,17 @@ class MCTS():
         self.N = {}
         self.alpha = 0.8
  
-    def search(self, s, mapp, game, pipe, ask_predict, process_id, alphabot=None):
-        logging.debug('Starting search')
+    def search(self, s, mapp, game, pipe, ask_predict, process_id, allow_move=False, alphabot=None):
+        # logging.debug('Starting search')
         s_k = to_hash(s)
         if game.game_ended():
-            logging.debug('Game Ended during search')
+            # logging.debug('Game Ended during search')
             reward = game.reward
             game.reward = 0
             return -reward
         
         if s_k not in self.tree:
-            logging.debug('New state encountered')
+            # logging.debug('New state encountered')
             self.tree.append(s_k)
             if alphabot is None:
                 ask_predict(process_id, s)
@@ -41,35 +41,39 @@ class MCTS():
             self.N[s_k] = np.zeros((4))
             return -v
         
-        turn = get_turn(mapp)
+        turn = s[..., -1].all() == 1  # get_turn(mapp)
         max_u, best_a = -float('inf'), -1
-        valid_actions = game.valid_actions(mapp, s, turn)
+        if not allow_move:
+            valid_actions = game.valid_actions(mapp, s, turn)
+        else:
+            valid_actions = [0, 1, 2, 3]
+
         if valid_actions == []:
             best_a = np.random.randint(0, 4)
             # return 1
 
-        logging.debug('Evaluating UCB')
+        # logging.debug('Evaluating UCB')
         for a in valid_actions:  # The actions
-            u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k]) / (1 + self.N[s_k][a]))
+            u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k])) / (1 + self.N[s_k][a])
             if u > max_u or (u == max_u and np.random.random() > 0.5):
                 max_u = u
                 best_a = a
-            logging.debug('Action %d has a value of %f' % (a, u))
+            # logging.debug('Action %d has a value of %f' % (a, u))
         
         a = best_a
-        logging.debug('\n ' + str(mapp))
+        # logging.debug('\n ' + str(mapp))
         new_map = copy.deepcopy(mapp)
         new_map = game.step(new_map, s, a, turn)
-        turn = get_turn(new_map)
+        turn = 1 - turn  # get_turn(new_map)
         
         if turn == 0:  # We update the state
-            sp = map_to_state(new_map, mapp, s, 0)  # TODO: Map to state
+            sp = map_to_state(new_map, mapp, s, 0)
         else:
             # But we have to change the point of view of it!
             sp = copy.copy(s)
             sp[..., -1] = 1
         
-        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, alphabot)
+        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, allow_move, alphabot)
         
         self.Q[s_k][a] = (self.N[s_k][a] * self.Q[s_k][a] + v) / (self.N[s_k][a] + 1)
         self.N[s_k][a] += 1
@@ -136,16 +140,17 @@ def process_map(gmap, gmap_old, state, idx):
     return np.concatenate([pov_0, pov_0_last, pov_1, pov_1_last, turn_m], axis=2)
 
 
-def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None, process_id=None, alphabot=None):
+def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None,
+              process_id=None, alphabot=None, allow_move=False):
     for i in range(n):
-        tree.search(s, mapp, game, pipe, ask_predict, process_id, alphabot=alphabot)
+        tree.search(s, mapp, game, pipe, ask_predict, process_id, alphabot=alphabot, allow_move=allow_move)
 
     x = tree.N[to_hash(s)]
     x = x / sum(x)
     return x
 
 
-def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None):
+def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, eval_g=False):
     game = emulator.Game(2)
     mapp = game.reset()
 
@@ -165,31 +170,36 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None):
         tree = MCTS()
         tree.alpha = alpha
         policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot)
-        # choosen = np.argmax(policy)
-        choosen = np.random.choice(4, p=policy)
-        logging.debug('Turn of %d Policy was %s Took action %s' % (turn, np.round(policy, 2), game.dir_name[choosen]))
+        if eval_g:
+            choosen = np.argmax(policy)
+        else:
+            choosen = np.random.choice(4, p=policy)
         policies.append(np.array(policy))
         mapp = game.step(mapp, s, choosen, turn)
 
-        turn = get_turn(mapp)
+        # turn = get_turn(mapp)
+        turn = 1 - turn
         if turn == 0:  # We update the state
-            logging.debug('Player 0 turn, updating the STATE')
+            # logging.debug('Player 0 turn, updating the STATE')
             s = map_to_state(mapp, old_mapp, s, 0)  # TODO: Map to state
         else:
-            logging.debug('Player 1 turn, not updating the STATE')
+            # logging.debug('Player 1 turn, not updating the STATE')
             s[..., -1] = 1
 
         if turn == 0:
             old_mapp = np.array(mapp)
 
-        printable_mapp = copy.copy(old_mapp)
-        printable_mapp[np.where(s[..., 1] == 1)] = 2
-        printable_mapp[np.where(s[..., 3] == 1)] = 3
+        logging.debug('Turn of %d Policy was %s Took action %s' % (1 - turn, np.round(policy, 2), game.dir_name[choosen]))
+        printable_state = map_to_state(mapp, old_mapp, s, 0)
+        printable_mapp = copy.copy(mapp)
+        printable_mapp[np.where(printable_state[..., 1] == 1)] = 2
+        printable_mapp[np.where(printable_state[..., 3] == 1)] = 3
         logging.debug('\n' + str(printable_mapp).replace('-1', '--'))
         
         if game.game_ended():
-            logging.debug('Game ended %d won' % (int(not turn)))
-            train_steps = divide_states(int(not turn), states, policies)
+            winner = turn
+            logging.debug('Game ended %d won' % (winner))
+            train_steps = divide_states(winner, states, policies)
             return train_steps
 
 
@@ -205,9 +215,13 @@ def divide_states(winner, states, policies):
 
     for state, policy in zip(states, policies):
         if state[..., -1].all() == winner:
-            value = 1
-        else:
+            value = 1 # As said below this is the last thing to understand (hopefully)
+        else:  # These have been reverted TODO
             value = -1
         train_steps.append(TrainStep(state, value, policy))
-
+        
+        new_state = state[:, :, [2, 3, 0, 1, 4]]
+        new_state[..., -1] = np.ones_like(new_state[..., -1]) - new_state[..., -1]
+        train_steps.append(TrainStep(new_state, value, policy))
+    
     return train_steps
