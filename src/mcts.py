@@ -154,8 +154,8 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, ev
     game = emulator.Game(2)
     mapp = game.reset()
 
-    # tree = MCTS()
-    # tree.alpha = alpha
+    tree = MCTS()
+    tree.alpha = alpha
 
     old_mapp = None
     turn = 0
@@ -167,8 +167,8 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, ev
     while not game.game_ended():
         states.append(np.array(s))
 
-        tree = MCTS()
-        tree.alpha = alpha
+        # tree = MCTS()
+        # tree.alpha = alpha
         policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot)
         if eval_g:
             choosen = np.argmax(policy)
