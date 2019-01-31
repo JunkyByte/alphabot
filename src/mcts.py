@@ -23,44 +23,44 @@ class MCTS():
             game.reward = 0
             return -reward
         
+        turn = s[..., -1].all() == 1  # get_turn(mapp)
         if s_k not in self.tree:
             # logging.debug('New state encountered')
             self.tree.append(s_k)
-            if alphabot is None:
-                ask_predict(process_id, s)
-                raw_prediction = pipe.recv()
-                policy, value = raw_prediction['policy'], raw_prediction['value']
-            else:
-                policy, value = alphabot.predict(s.astype(np.float32)[np.newaxis])
-                policy = policy[0]
-                value = value[0]
-            
+            ask_predict(process_id, s, alphabot)
+            raw_prediction = pipe.recv()
+            policy, value = raw_prediction['policy'], raw_prediction['value']
+            if not allow_move:
+                valid_actions = game.valid_actions(mapp, s, turn)
+                if len(valid_actions) < 3:
+                    missing_idx = [v for v in [0, 1, 2, 3] if v not in valid_actions]
+                    policy[missing_idx] = -100
+
             policy = softmax(policy)[0]
             self.P[s_k], v = policy, value
             self.Q[s_k] = np.zeros((4))
             self.N[s_k] = np.zeros((4))
             return -v
         
-        turn = s[..., -1].all() == 1  # get_turn(mapp)
         max_u, best_a = -float('inf'), -1
         if not allow_move:
             valid_actions = game.valid_actions(mapp, s, turn)
         else:
             valid_actions = [0, 1, 2, 3]
 
-        if valid_actions == []:
-            best_a = np.random.randint(0, 4)
-            # return 1
-
         # logging.debug('Evaluating UCB')
         for a in valid_actions:  # The actions
-            u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k])) / (1 + self.N[s_k][a])
+            u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(max(1, np.sum(self.N[s_k]))) / (1 + self.N[s_k][a])
             if u > max_u or (u == max_u and np.random.random() > 0.5):
                 max_u = u
                 best_a = a
             # logging.debug('Action %d has a value of %f' % (a, u))
         
-        a = best_a
+        if valid_actions == []:
+            a = np.random.randint(0, 4)
+        else:
+            a = best_a
+
         # logging.debug('\n ' + str(mapp))
         new_map = copy.deepcopy(mapp)
         new_map = game.step(new_map, s, a, turn)
@@ -215,8 +215,8 @@ def divide_states(winner, states, policies):
 
     for state, policy in zip(states, policies):
         if state[..., -1].all() == winner:
-            value = 1 # As said below this is the last thing to understand (hopefully)
-        else:  # These have been reverted TODO
+            value = 1
+        else:
             value = -1
         train_steps.append(TrainStep(state, value, policy))
         
