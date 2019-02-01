@@ -14,7 +14,7 @@ class MCTS():
         self.N = {}
         self.alpha = 0.8
  
-    def search(self, s, mapp, game, pipe, ask_predict, process_id, allow_move=False, alphabot=None):
+    def search(self, s, mapp, game, pipe, ask_predict, process_id, allow_move=False, alphabot=None, head_pos=None):
         # logging.debug('Starting search')
         s_k = to_hash(s)
         if game.game_ended():
@@ -45,6 +45,7 @@ class MCTS():
         max_u, best_a = -float('inf'), -1
         if not allow_move:
             valid_actions = game.valid_actions(mapp, s, turn)
+            # valid_actions = [0, 1, 2, 3]
         else:
             valid_actions = [0, 1, 2, 3]
 
@@ -63,17 +64,18 @@ class MCTS():
 
         # logging.debug('\n ' + str(mapp))
         new_map = copy.deepcopy(mapp)
-        new_map = game.step(new_map, s, a, turn)
+        new_map, tmp_head = game.step(new_map, s, a, turn, mcts=True)
         turn = 1 - turn  # get_turn(new_map)
         
         if turn == 0:  # We update the state
-            sp = map_to_state(new_map, mapp, s, 0)
+            sp = map_to_state(new_map, mapp, s, 0, head_pos)
         else:
             # But we have to change the point of view of it!
             sp = copy.copy(s)
+            head_pos = tmp_head
             sp[..., -1] = 1
         
-        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, allow_move, alphabot)
+        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, allow_move, alphabot, head_pos)
         
         self.Q[s_k][a] = (self.N[s_k][a] * self.Q[s_k][a] + v) / (self.N[s_k][a] + 1)
         self.N[s_k][a] += 1
@@ -104,17 +106,17 @@ def get_turn(x):
     return idx[np.argmin(count)]
 
 
-def map_to_state(gmap, gmap_old, state, turn):
+def map_to_state(gmap, gmap_old, state, turn, head_pos=None):
     if type(gmap_old) != np.ndarray:
         gmap_old = np.full_like(gmap, -1)
 
     states = np.empty(INPUT_SIZE, dtype=np.int)
 
-    states = process_map(gmap, gmap_old, state, turn)
+    states = process_map(gmap, gmap_old, state, turn, head_pos)
     return states
 
 
-def process_map(gmap, gmap_old, state, idx):
+def process_map(gmap, gmap_old, state, idx, head_pos=None):
     pov_0 = np.zeros((*INPUT_SIZE[:2], 1), dtype=np.int)
     pov_0_last = np.zeros((*INPUT_SIZE[:2], 1), dtype=np.int)
     pov_1 = np.zeros((*INPUT_SIZE[:2], 1), dtype=np.int)
@@ -130,7 +132,10 @@ def process_map(gmap, gmap_old, state, idx):
     pov_1_last = pov_1 - pov_1_last
 
     if sum(sum(pov_0_last)) == 0:
-        pov_0_last = np.expand_dims(state[..., 1], axis=-1)
+        if head_pos is not None:
+            pov_0_last[head_pos] = 1
+        else:
+            pov_0_last = np.expand_dims(state[..., 1], axis=-1)
 
     if sum(sum(pov_1_last)) == 0:
         pov_1_last = np.expand_dims(state[..., 3], axis=-1)
@@ -189,12 +194,12 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, ev
         if turn == 0:
             old_mapp = np.array(mapp)
 
-        logging.debug('Turn of %d Policy was %s Took action %s' % (1 - turn, np.round(policy, 2), game.dir_name[choosen]))
-        printable_state = map_to_state(mapp, old_mapp, s, 0)
-        printable_mapp = copy.copy(mapp)
-        printable_mapp[np.where(printable_state[..., 1] == 1)] = 2
-        printable_mapp[np.where(printable_state[..., 3] == 1)] = 3
-        logging.debug('\n' + str(printable_mapp).replace('-1', '--'))
+        # logging.debug('Turn of %d Policy was %s Took action %s' % (1 - turn, np.round(policy, 2), game.dir_name[choosen]))
+        # printable_state = map_to_state(mapp, old_mapp, s, 0)
+        # printable_mapp = copy.copy(mapp)
+        # printable_mapp[np.where(printable_state[..., 1] == 1)] = 2
+        # printable_mapp[np.where(printable_state[..., 3] == 1)] = 3
+        # logging.debug('\n' + str(printable_mapp).replace('-1', '--'))
         
         if game.game_ended():
             winner = turn
