@@ -3,7 +3,8 @@ import copy
 import numpy as np
 import emulator
 
-INPUT_SIZE = (16, 16, 5)  # Map size fixed to 16x16 (2 to 3 players)
+# INPUT_SIZE = (16, 16, 5)  # Map size fixed to 16x16 (2 to 3 players)
+INPUT_SIZE = (9, 9, 5)
 
 
 class MCTS():
@@ -30,15 +31,18 @@ class MCTS():
             ask_predict(process_id, s, alphabot)
             raw_prediction = pipe.recv()
             policy, value = raw_prediction['policy'], raw_prediction['value']
-            if not allow_move:
-                valid_actions = game.valid_actions(mapp, s, turn)
-                if len(valid_actions) < 3:
-                    missing_idx = [v for v in [0, 1, 2, 3] if v not in valid_actions]
-                    policy[missing_idx] = -100
+            valid_actions = game.valid_actions(mapp, s, turn)
+            if len(valid_actions) < 4:
+                missing_idx = [v for v in [0, 1, 2, 3] if v not in valid_actions]
+                policy[missing_idx] = 0
+            
+            if sum(policy) > 0:
+                policy = policy / sum(policy)
+            else:
+                policy = np.ones((4)) / 4
 
-            policy = softmax(policy)[0]
             self.P[s_k], v = policy, value
-            self.Q[s_k] = np.zeros((4))
+            self.Q[s_k] = np.ones((4)) * -100
             self.N[s_k] = np.zeros((4))
             return -v
         
@@ -51,21 +55,23 @@ class MCTS():
 
         # logging.debug('Evaluating UCB')
         for a in valid_actions:  # The actions
-            u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(max(1, np.sum(self.N[s_k]))) / (1 + self.N[s_k][a])
+            if self.Q[s_k][a] != -100:
+                u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k])) / (1 + self.N[s_k][a])
+            else:
+                u = self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k]) + 1e-7)
+
             if u > max_u or (u == max_u and np.random.random() > 0.5):
                 max_u = u
                 best_a = a
-            # logging.debug('Action %d has a value of %f' % (a, u))
         
         if valid_actions == []:
             a = np.random.randint(0, 4)
         else:
             a = best_a
 
-        # logging.debug('\n ' + str(mapp))
         new_map = copy.deepcopy(mapp)
         new_map, tmp_head = game.step(new_map, s, a, turn, mcts=True)
-        turn = 1 - turn  # get_turn(new_map)
+        turn = 1 - turn
         
         if turn == 0:  # We update the state
             sp = map_to_state(new_map, mapp, s, 0, head_pos)
@@ -77,7 +83,10 @@ class MCTS():
         
         v = self.search(sp, new_map, game, pipe, ask_predict, process_id, allow_move, alphabot, head_pos)
         
-        self.Q[s_k][a] = (self.N[s_k][a] * self.Q[s_k][a] + v) / (self.N[s_k][a] + 1)
+        if self.Q[s_k][a] == -100:
+            self.Q[s_k][a] = v
+        else:
+            self.Q[s_k][a] = (self.N[s_k][a] * self.Q[s_k][a] + v) / (self.N[s_k][a] + 1)
         self.N[s_k][a] += 1
         
         return -v
@@ -166,29 +175,27 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, ev
     turn = 0
     s = map_to_state(mapp, old_mapp, None, 0)
     old_mapp = copy.deepcopy(mapp)
+    head = None
 
     states = []
     policies = []
     while not game.game_ended():
         states.append(np.array(s))
 
-        # tree = MCTS()
-        # tree.alpha = alpha
         policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot)
         if eval_g:
             choosen = np.argmax(policy)
         else:
             choosen = np.random.choice(4, p=policy)
+        
         policies.append(np.array(policy))
-        mapp = game.step(mapp, s, choosen, turn)
+        mapp, tmp_head = game.step(mapp, s, choosen, turn, mcts=True)
 
-        # turn = get_turn(mapp)
         turn = 1 - turn
         if turn == 0:  # We update the state
-            # logging.debug('Player 0 turn, updating the STATE')
-            s = map_to_state(mapp, old_mapp, s, 0)  # TODO: Map to state
+            s = map_to_state(mapp, old_mapp, s, 0, head)  # TODO: Map to state
         else:
-            # logging.debug('Player 1 turn, not updating the STATE')
+            head = tmp_head 
             s[..., -1] = 1
 
         if turn == 0:
@@ -203,7 +210,7 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, ev
         
         if game.game_ended():
             winner = turn
-            logging.debug('Game ended %d won' % (winner))
+            # logging.debug('Game ended %d won' % (winner))
             train_steps = divide_states(winner, states, policies)
             return train_steps
 
