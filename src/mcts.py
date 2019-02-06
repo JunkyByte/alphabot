@@ -28,9 +28,15 @@ class MCTS():
         if s_k not in self.tree:
             # logging.debug('New state encountered')
             self.tree.append(s_k)
-            ask_predict(process_id, s, alphabot)
-            raw_prediction = pipe.recv()
-            policy, value = raw_prediction['policy'], raw_prediction['value']
+            if isinstance(alphabot, str):
+                ask_predict(process_id, s, alphabot)
+                raw_prediction = pipe.recv()
+                policy, value = raw_prediction['policy'], raw_prediction['value']
+            else:
+                policy, value = alphabot.predict(s[np.newaxis].astype(np.float32))
+                policy = policy[0]
+                value = value[0]
+
             valid_actions = game.valid_actions(mapp, s, turn)
             if len(valid_actions) < 4:
                 missing_idx = [v for v in [0, 1, 2, 3] if v not in valid_actions]
@@ -164,7 +170,7 @@ def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None,
     return x
 
 
-def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, eval_g=False):
+def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, alphabot=None, eval_g=False, return_state=False):
     game = emulator.Game(2)
     mapp = game.reset()
 
@@ -211,6 +217,9 @@ def simulate_game(steps, alpha, pipe, ask_predict, process_id, alphabot=None, ev
         if game.game_ended():
             winner = turn
             # logging.debug('Game ended %d won' % (winner))
+            if return_state:
+                return states
+
             train_steps = divide_states(winner, states, policies)
             return train_steps
 
