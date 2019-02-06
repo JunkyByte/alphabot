@@ -1,6 +1,6 @@
 import numpy as np
 import emulator_utils
-import emulator_vis
+##import emulator_vis
 from copy import copy
 null_map = -1
 
@@ -11,7 +11,6 @@ MAP_SIZE = 9
 
 class Game():
     def __init__(self, n_players):
-        np.set_printoptions(threshold=np.nan)
         self.n_players = n_players
         self.MAP_SIZE = MAP_SIZE  # emulator_utils.get_map_size(self.n_players)
         self.dir_name = {0: 'right', 1: 'down', 2: 'left', 3: 'up'}

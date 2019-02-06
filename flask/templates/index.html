@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script>
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port)
+      document.addEventListener('DOMContentLoaded', () => {
+        socket.on('connect', () => {
+        console.log("inside socket connect")
+          socket.emit("ready")
+        });
+
+      socket.on("new", data => {
+
+      })
+
+      var button = document.createElement("input")
+      button.setAttribute("type", "submit")
+      button.setAttribute("value", "submit")
+      button.setAttribute("id", "submit")
+      document.body.append(button)
+      document.getElementById ("submit").addEventListener("click", function() {
+          const request = new XMLHttpRequest();
+          request.open("GET", "/get_name")
+          request.onload = () => {
+            var data = JSON.parse(request.responseText)
+            if(data.success) {
+              name = data["name"]
+              console.log(name)
+              load_gif(name)
+            }
+          }
+          request.send()
+      });
+
+      })//end DOMContentLoaded
+
+      function load_gif(name) {
+        const im = document.createElement('img')
+        im.setAttribute("src", name)
+        im.setAttribute("title", "gif")
+        document.body.append(im)
+      }
+    </script>
+    <title>Test</title>
+  </head>
+  <body>
+    <!--<img src="/static/giphy.gif" title="title"></img>-->
+  </body>
+</html>
