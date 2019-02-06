@@ -1,158 +1,25 @@
-2019-02-06 23:22:59,667 Loading first model
-2019-02-06 23:22:59,671  * Debugger is active!
-2019-02-06 23:22:59,671  * Debugger PIN: 270-896-148
-2019-02-06 23:23:05,203 Initializing WebSocket
-2019-02-06 23:23:05,203 Validating WebSocket request
-2019-02-06 23:23:05,210 127.0.0.1 - - [2019-02-06 23:23:05] "GET / HTTP/1.1" 200 1751 0.007606
-2019-02-06 23:23:05,611 Initializing WebSocket
-2019-02-06 23:23:05,611 Validating WebSocket request
-2019-02-06 23:23:05,615 127.0.0.1 - - [2019-02-06 23:23:05] "GET /socket.io/?EIO=3&transport=polling&t=1549491785378-0 HTTP/1.1" 200 357 0.004246
-2019-02-06 23:23:05,759 Initializing WebSocket
-2019-02-06 23:23:05,759 Validating WebSocket request
-2019-02-06 23:23:05,759 Can only upgrade connection if using GET method.
-2019-02-06 23:23:05,760 127.0.0.1 - - [2019-02-06 23:23:05] "POST /socket.io/?EIO=3&transport=polling&t=1549491785670-1&sid=d7ae238c51064360b11257436c3488d8 HTTP/1.1" 200 175 0.001535
-2019-02-06 23:23:05,761 Initializing WebSocket
-2019-02-06 23:23:05,761 Validating WebSocket request
-2019-02-06 23:23:05,761 Attempting to upgrade connection
-2019-02-06 23:23:05,761 WebSocket request accepted, switching protocols
-2019-02-06 23:23:05,762 Initializing WebSocket
-2019-02-06 23:23:05,762 Validating WebSocket request
-2019-02-06 23:23:05,764 127.0.0.1 - - [2019-02-06 23:23:05] "GET /socket.io/?EIO=3&transport=polling&t=1549491785673-2&sid=d7ae238c51064360b11257436c3488d8 HTTP/1.1" 200 222 0.001552
-2019-02-06 23:23:05,829 Initializing WebSocket
-2019-02-06 23:23:05,829 Validating WebSocket request
-2019-02-06 23:23:05,831 127.0.0.1 - - [2019-02-06 23:23:05] "GET /socket.io/?EIO=3&transport=polling&t=1549491785788-3&sid=d7ae238c51064360b11257436c3488d8 HTTP/1.1" 200 191 0.001717
-2019-02-06 23:23:08,010 Initializing WebSocket
-2019-02-06 23:23:08,010 Validating WebSocket request
-2019-02-06 23:23:08,011 127.0.0.1 - - [2019-02-06 23:23:08] "GET /get_name HTTP/1.1" 200 162 0.001373
-2019-02-06 23:23:08,019 Initializing WebSocket
-2019-02-06 23:23:08,019 Validating WebSocket request
-2019-02-06 23:23:08,024 127.0.0.1 - - [2019-02-06 23:23:08] "GET /static/run_5.gif HTTP/1.1" 200 2445 0.005913
-2019-02-06 23:23:09,153 Game was successfully simulated
-2019-02-06 23:23:09,160 Simulation 0 has finished
-2019-02-06 23:23:18,041 Game was successfully simulated
-2019-02-06 23:23:18,057 Simulation 1 has finished
-2019-02-06 23:23:19,611 Initializing WebSocket
-2019-02-06 23:23:19,611 Validating WebSocket request
-2019-02-06 23:23:19,612 127.0.0.1 - - [2019-02-06 23:23:19] "GET /get_name HTTP/1.1" 200 162 0.001476
-2019-02-06 23:23:19,639 Initializing WebSocket
-2019-02-06 23:23:19,639 Validating WebSocket request
-2019-02-06 23:23:19,641 127.0.0.1 - - [2019-02-06 23:23:19] "GET /static/run_2.gif HTTP/1.1" 200 2667 0.002326
-2019-02-06 23:23:19,783 Initializing WebSocket
-2019-02-06 23:23:19,783 Validating WebSocket request
-2019-02-06 23:23:19,789 127.0.0.1 - - [2019-02-06 23:23:19] "GET /get_name HTTP/1.1" 200 162 0.006092
-2019-02-06 23:23:19,811 Initializing WebSocket
-2019-02-06 23:23:19,811 Validating WebSocket request
-2019-02-06 23:23:19,812 127.0.0.1 - - [2019-02-06 23:23:19] "GET /static/run_0.gif HTTP/1.1" 200 1462 0.001334
-2019-02-06 23:23:19,933 Initializing WebSocket
-2019-02-06 23:23:19,934 Validating WebSocket request
-2019-02-06 23:23:19,934 127.0.0.1 - - [2019-02-06 23:23:19] "GET /get_name HTTP/1.1" 200 162 0.000992
-2019-02-06 23:23:20,060 Initializing WebSocket
-2019-02-06 23:23:20,061 Validating WebSocket request
-2019-02-06 23:23:20,062 127.0.0.1 - - [2019-02-06 23:23:20] "GET /get_name HTTP/1.1" 200 162 0.001426
-2019-02-06 23:23:20,072 Initializing WebSocket
-2019-02-06 23:23:20,072 Validating WebSocket request
-2019-02-06 23:23:20,074 127.0.0.1 - - [2019-02-06 23:23:20] "GET /static/run_6.gif HTTP/1.1" 200 2683 0.001274
-2019-02-06 23:23:20,790 Initializing WebSocket
-2019-02-06 23:23:20,790 Validating WebSocket request
-2019-02-06 23:23:20,791 127.0.0.1 - - [2019-02-06 23:23:20] "GET /get_name HTTP/1.1" 200 162 0.000797
-2019-02-06 23:23:20,964 Initializing WebSocket
-2019-02-06 23:23:20,964 Validating WebSocket request
-2019-02-06 23:23:20,967 127.0.0.1 - - [2019-02-06 23:23:20] "GET /get_name HTTP/1.1" 200 162 0.002483
-2019-02-06 23:23:20,976 Initializing WebSocket
-2019-02-06 23:23:20,976 Validating WebSocket request
-2019-02-06 23:23:20,983 127.0.0.1 - - [2019-02-06 23:23:20] "GET /static/run_3.gif HTTP/1.1" 200 2769 0.007125
-2019-02-06 23:23:21,101 Initializing WebSocket
-2019-02-06 23:23:21,101 Validating WebSocket request
-2019-02-06 23:23:21,102 127.0.0.1 - - [2019-02-06 23:23:21] "GET /get_name HTTP/1.1" 200 162 0.001057
-2019-02-06 23:23:21,115 Initializing WebSocket
-2019-02-06 23:23:21,115 Validating WebSocket request
-2019-02-06 23:23:21,117 127.0.0.1 - - [2019-02-06 23:23:21] "GET /static/run_4.gif HTTP/1.1" 200 1764 0.001455
-2019-02-06 23:23:21,250 Initializing WebSocket
-2019-02-06 23:23:21,250 Validating WebSocket request
-2019-02-06 23:23:21,251 127.0.0.1 - - [2019-02-06 23:23:21] "GET /get_name HTTP/1.1" 200 162 0.000996
-2019-02-06 23:23:26,655 Game was successfully simulated
-2019-02-06 23:23:26,666 Simulation 2 has finished
-2019-02-06 23:23:37,859 Game was successfully simulated
-2019-02-06 23:23:37,876 Simulation 3 has finished
-2019-02-06 23:23:44,883 Game was successfully simulated
-2019-02-06 23:23:44,894 Simulation 4 has finished
-2019-02-06 23:23:56,296 Game was successfully simulated
-2019-02-06 23:23:56,312 Simulation 5 has finished
-2019-02-06 23:24:06,949 Game was successfully simulated
-2019-02-06 23:24:06,965 Simulation 6 has finished
-2019-02-06 23:24:07,771 Initializing WebSocket
-2019-02-06 23:24:07,771 Validating WebSocket request
-2019-02-06 23:24:07,772 127.0.0.1 - - [2019-02-06 23:24:07] "GET /get_name HTTP/1.1" 200 162 0.001152
-2019-02-06 23:24:07,789 Initializing WebSocket
-2019-02-06 23:24:07,789 Validating WebSocket request
-2019-02-06 23:24:07,791 127.0.0.1 - - [2019-02-06 23:24:07] "GET /static/giphy.gif HTTP/1.1" 200 121902 0.002058
-2019-02-06 23:24:12,987 Closed WebSocket
-2019-02-06 23:24:12,988 Failed to write closing frame -> closing socket
-2019-02-06 23:24:12,988 Closed WebSocket
-2019-02-06 23:24:14,783 Initializing WebSocket
-2019-02-06 23:24:14,784 Validating WebSocket request
-2019-02-06 23:24:14,785 127.0.0.1 - - [2019-02-06 23:24:14] "GET /socket.io/?EIO=3&transport=polling&t=1549491854772-0 HTTP/1.1" 200 357 0.001273
-2019-02-06 23:24:14,945 Initializing WebSocket
-2019-02-06 23:24:14,945 Validating WebSocket request
-2019-02-06 23:24:14,945 Attempting to upgrade connection
-2019-02-06 23:24:14,945 WebSocket request accepted, switching protocols
-2019-02-06 23:24:14,965 Initializing WebSocket
-2019-02-06 23:24:14,965 Validating WebSocket request
-2019-02-06 23:24:14,966 Initializing WebSocket
-2019-02-06 23:24:14,966 Validating WebSocket request
-2019-02-06 23:24:14,966 Can only upgrade connection if using GET method.
-2019-02-06 23:24:14,968 127.0.0.1 - - [2019-02-06 23:24:14] "POST /socket.io/?EIO=3&transport=polling&t=1549491854820-1&sid=532a9899133d4a859aa3050679ad08ce HTTP/1.1" 200 175 0.002319
-2019-02-06 23:24:14,970 127.0.0.1 - - [2019-02-06 23:24:14] "GET /socket.io/?EIO=3&transport=polling&t=1549491854823-2&sid=532a9899133d4a859aa3050679ad08ce HTTP/1.1" 200 222 0.004992
-2019-02-06 23:24:15,148 Initializing WebSocket
-2019-02-06 23:24:15,148 Validating WebSocket request
-2019-02-06 23:24:15,149 127.0.0.1 - - [2019-02-06 23:24:15] "GET /socket.io/?EIO=3&transport=polling&t=1549491854999-3&sid=532a9899133d4a859aa3050679ad08ce HTTP/1.1" 200 191 0.000518
-2019-02-06 23:24:16,857 Game was successfully simulated
-2019-02-06 23:24:16,870 Simulation 7 has finished
-2019-02-06 23:24:24,896 Closed WebSocket
-2019-02-06 23:24:24,896 Failed to write closing frame -> closing socket
-2019-02-06 23:24:24,896 Closed WebSocket
-2019-02-06 23:24:24,960 Initializing WebSocket
-2019-02-06 23:24:24,960 Validating WebSocket request
-2019-02-06 23:24:24,963 127.0.0.1 - - [2019-02-06 23:24:24] "GET /update HTTP/1.1" 404 342 0.003278
-2019-02-06 23:24:25,707 Game was successfully simulated
-2019-02-06 23:24:25,718 Simulation 8 has finished
-2019-02-06 23:24:28,801 Initializing WebSocket
-2019-02-06 23:24:28,801 Validating WebSocket request
-2019-02-06 23:24:28,801 127.0.0.1 - - [2019-02-06 23:24:28] "GET /socket.io/?EIO=3&transport=polling&t=1549491868789-0 HTTP/1.1" 200 357 0.000687
-2019-02-06 23:24:28,970 Initializing WebSocket
-2019-02-06 23:24:28,970 Validating WebSocket request
-2019-02-06 23:24:28,970 Attempting to upgrade connection
-2019-02-06 23:24:28,970 WebSocket request accepted, switching protocols
-2019-02-06 23:24:29,050 Initializing WebSocket
-2019-02-06 23:24:29,051 Validating WebSocket request
-2019-02-06 23:24:29,051 Can only upgrade connection if using GET method.
-2019-02-06 23:24:29,052 127.0.0.1 - - [2019-02-06 23:24:29] "POST /socket.io/?EIO=3&transport=polling&t=1549491868846-1&sid=e5509e775b2f4c8b98e33d4c89d70abd HTTP/1.1" 200 175 0.001492
-2019-02-06 23:24:29,053 Initializing WebSocket
-2019-02-06 23:24:29,054 Validating WebSocket request
-2019-02-06 23:24:29,054 127.0.0.1 - - [2019-02-06 23:24:29] "GET /socket.io/?EIO=3&transport=polling&t=1549491868849-2&sid=e5509e775b2f4c8b98e33d4c89d70abd HTTP/1.1" 200 226 0.000633
-2019-02-06 23:24:29,311 Closed WebSocket
-2019-02-06 23:24:29,311 Failed to write closing frame -> closing socket
-2019-02-06 23:24:29,311 Closed WebSocket
-2019-02-06 23:24:30,838 Initializing WebSocket
-2019-02-06 23:24:30,843 Validating WebSocket request
-2019-02-06 23:24:30,844 127.0.0.1 - - [2019-02-06 23:24:30] "GET /socket.io/?EIO=3&transport=polling&t=1549491870830-0 HTTP/1.1" 200 357 0.006108
-2019-02-06 23:24:30,992 Initializing WebSocket
-2019-02-06 23:24:30,992 Validating WebSocket request
-2019-02-06 23:24:30,992 Can only upgrade connection if using GET method.
-2019-02-06 23:24:30,993 127.0.0.1 - - [2019-02-06 23:24:30] "POST /socket.io/?EIO=3&transport=polling&t=1549491870875-1&sid=5b5d1f1c6b284e8089d18c0d657d7586 HTTP/1.1" 200 175 0.001029
-2019-02-06 23:24:30,994 Initializing WebSocket
-2019-02-06 23:24:30,994 Validating WebSocket request
-2019-02-06 23:24:30,994 Attempting to upgrade connection
-2019-02-06 23:24:30,994 WebSocket request accepted, switching protocols
-2019-02-06 23:24:31,000 Initializing WebSocket
-2019-02-06 23:24:31,000 Validating WebSocket request
-2019-02-06 23:24:31,001 127.0.0.1 - - [2019-02-06 23:24:31] "GET /socket.io/?EIO=3&transport=polling&t=1549491870878-2&sid=5b5d1f1c6b284e8089d18c0d657d7586 HTTP/1.1" 200 222 0.000561
-2019-02-06 23:24:31,206 Initializing WebSocket
-2019-02-06 23:24:31,206 Validating WebSocket request
-2019-02-06 23:24:31,206 127.0.0.1 - - [2019-02-06 23:24:31] "GET /socket.io/?EIO=3&transport=polling&t=1549491871013-3&sid=5b5d1f1c6b284e8089d18c0d657d7586 HTTP/1.1" 200 191 0.000564
-2019-02-06 23:24:33,704 Initializing WebSocket
-2019-02-06 23:24:33,704 Validating WebSocket request
-2019-02-06 23:24:33,705 127.0.0.1 - - [2019-02-06 23:24:33] "GET /get_name HTTP/1.1" 200 162 0.001441
-2019-02-06 23:24:36,301 Game was successfully simulated
-2019-02-06 23:24:36,315 Simulation 9 has finished
-2019-02-06 23:24:36,315 Sleeping
+2019-02-07 00:23:36,163  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2019-02-07 00:23:39,027 127.0.0.1 - - [07/Feb/2019 00:23:39] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495419018-48 HTTP/1.1[0m" 200 -
+2019-02-07 00:23:39,041 127.0.0.1 - - [07/Feb/2019 00:23:39] "[37mPOST /socket.io/?EIO=3&transport=polling&t=1549495419031-49&sid=6dfb79756e1741fc8ddc02e299ea7213 HTTP/1.1[0m" 200 -
+2019-02-07 00:23:39,047 127.0.0.1 - - [07/Feb/2019 00:23:39] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495419033-50&sid=6dfb79756e1741fc8ddc02e299ea7213 HTTP/1.1[0m" 200 -
+2019-02-07 00:23:41,807 127.0.0.1 - - [07/Feb/2019 00:23:41] "[37mGET / HTTP/1.1[0m" 200 -
+2019-02-07 00:23:41,910 127.0.0.1 - - [07/Feb/2019 00:23:41] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495421901-0 HTTP/1.1[0m" 200 -
+2019-02-07 00:23:41,946 127.0.0.1 - - [07/Feb/2019 00:23:41] "[37mPOST /socket.io/?EIO=3&transport=polling&t=1549495421919-1&sid=16e4d0970bba417bbf8f51fdf20e4a80 HTTP/1.1[0m" 200 -
+2019-02-07 00:23:41,947 127.0.0.1 - - [07/Feb/2019 00:23:41] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495421920-2&sid=16e4d0970bba417bbf8f51fdf20e4a80 HTTP/1.1[0m" 200 -
+2019-02-07 00:23:43,385 127.0.0.1 - - [07/Feb/2019 00:23:43] "[37mGET /get_name HTTP/1.1[0m" 200 -
+2019-02-07 00:23:43,391 127.0.0.1 - - [07/Feb/2019 00:23:43] "[37mGET /static/run_0.gif HTTP/1.1[0m" 200 -
+2019-02-07 00:23:54,938 127.0.0.1 - - [07/Feb/2019 00:23:54] "[37mGET /get_name HTTP/1.1[0m" 200 -
+2019-02-07 00:23:54,943 127.0.0.1 - - [07/Feb/2019 00:23:54] "[37mGET /static/run_8.gif HTTP/1.1[0m" 200 -
+2019-02-07 00:24:06,926 127.0.0.1 - - [07/Feb/2019 00:24:06] "[37mPOST /socket.io/?EIO=3&transport=polling&t=1549495446917-4&sid=16e4d0970bba417bbf8f51fdf20e4a80 HTTP/1.1[0m" 200 -
+2019-02-07 00:24:39,059 127.0.0.1 - - [07/Feb/2019 00:24:39] "[1m[31mGET /socket.io/?EIO=3&transport=polling&t=1549495419049-51&sid=6dfb79756e1741fc8ddc02e299ea7213 HTTP/1.1[0m" 400 -
+2019-02-07 00:24:41,961 127.0.0.1 - - [07/Feb/2019 00:24:41] "[1m[31mGET /socket.io/?EIO=3&transport=polling&t=1549495421950-3&sid=16e4d0970bba417bbf8f51fdf20e4a80 HTTP/1.1[0m" 400 -
+2019-02-07 00:24:41,977 127.0.0.1 - - [07/Feb/2019 00:24:41] "[1m[31mPOST /socket.io/?EIO=3&transport=polling&t=1549495481963-5&sid=16e4d0970bba417bbf8f51fdf20e4a80 HTTP/1.1[0m" 400 -
+2019-02-07 00:24:43,357 127.0.0.1 - - [07/Feb/2019 00:24:43] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495483348-6 HTTP/1.1[0m" 200 -
+2019-02-07 00:24:43,369 127.0.0.1 - - [07/Feb/2019 00:24:43] "[37mPOST /socket.io/?EIO=3&transport=polling&t=1549495483360-7&sid=5a1d1f34c8994220ab5d9b571123de88 HTTP/1.1[0m" 200 -
+2019-02-07 00:24:43,375 127.0.0.1 - - [07/Feb/2019 00:24:43] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495483360-8&sid=5a1d1f34c8994220ab5d9b571123de88 HTTP/1.1[0m" 200 -
+2019-02-07 00:25:08,369 127.0.0.1 - - [07/Feb/2019 00:25:08] "[37mPOST /socket.io/?EIO=3&transport=polling&t=1549495508360-10&sid=5a1d1f34c8994220ab5d9b571123de88 HTTP/1.1[0m" 200 -
+2019-02-07 00:25:43,386 127.0.0.1 - - [07/Feb/2019 00:25:43] "[1m[31mGET /socket.io/?EIO=3&transport=polling&t=1549495483378-9&sid=5a1d1f34c8994220ab5d9b571123de88 HTTP/1.1[0m" 400 -
+2019-02-07 00:25:43,397 127.0.0.1 - - [07/Feb/2019 00:25:43] "[1m[31mPOST /socket.io/?EIO=3&transport=polling&t=1549495543388-11&sid=5a1d1f34c8994220ab5d9b571123de88 HTTP/1.1[0m" 400 -
+2019-02-07 00:25:43,954 127.0.0.1 - - [07/Feb/2019 00:25:43] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495543946-12 HTTP/1.1[0m" 200 -
+2019-02-07 00:25:43,967 127.0.0.1 - - [07/Feb/2019 00:25:43] "[37mPOST /socket.io/?EIO=3&transport=polling&t=1549495543958-13&sid=1392fbc1a2044969824d67bfb7e05599 HTTP/1.1[0m" 200 -
+2019-02-07 00:25:43,974 127.0.0.1 - - [07/Feb/2019 00:25:43] "[37mGET /socket.io/?EIO=3&transport=polling&t=1549495543958-14&sid=1392fbc1a2044969824d67bfb7e05599 HTTP/1.1[0m" 200 -

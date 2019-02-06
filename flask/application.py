@@ -4,47 +4,50 @@ from array2gif import write_gif
 import numpy as np
 import cv2
 import sys
-sys.path.append('../src/')
-from mcts import simulate_game
 import keras
 from keras.models import load_model
 from multiprocessing import Process
 from time import sleep
 import os
 import logging
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # see issue #152
+sys.path.append('../src/')
+from mcts import simulate_game
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 app = Flask(__name__)
 app.config["SECRETE_KEY"] = "secret"
 socketio = SocketIO(app)
-logging.basicConfig(filename='flask_logging.log', level=logging.DEBUG, format='%(asctime)s %(message)s', filemode='w')
+logging.basicConfig(filename='flask_logging.log', level=logging.INFO, format='%(asctime)s %(message)s', filemode='w')
+
 
 @app.route("/")
 def index():
     test = {
-        "messaggio" : "ciao"
+        "messaggio": "ciao"
     }
     socketio.emit("new", test)
     return render_template("index.html")
 
+
 @socketio.on("ready")
 def update():
     test = {
-        "messaggio" : "ciao"
+        "messaggio": "ciao"
     }
     emit("new", test)
+
 
 @app.route("/get_name", methods=["GET"])
 def get_name():
     all_files = [file for file in os.listdir('./static/') if file.endswith('.gif')]
     if len(all_files) == 0:
-        return jsonify({'success' : False, 'name' : 'nameplaceholder'})
+        return jsonify({'success': False, 'name': 'nameplaceholder'})
 
     idx = np.random.randint(0, len(all_files))
     name = all_files[idx]
 
-    return jsonify({'success' : True, 'name' : os.path.join('/static/', name)})
+    return jsonify({'success': True, 'name': os.path.join('/static/', name)})
 
 
 def sim_to_gif(name, steps, alpha, alphabot):
@@ -76,26 +79,24 @@ def sim_to_gif(name, steps, alpha, alphabot):
         mapp[idx, cols, :] = 0
         mapp[idx, cols, 1] = 255
 
+        mapp = cv2.resize(mapp.astype(np.uint8), (480, 480), interpolation=cv2.INTER_AREA)
+        
         maps.append(mapp)
 
     maps = np.array(maps)
     write_gif(maps, os.path.join('./static/', name + '.gif'), fps=5)
 
+
 def async_sims():
-    steps = 25
+    steps = 100
     alpha = 1.
-    runs = 10
+    runs = 50
     model_path = '../alphabot_best.pickle'
     logging.debug('Loading first model')
-    alphabot = load_model(model_path, custom_objects={'categorical_weighted' : keras.losses.categorical_crossentropy})
-    last_modifications = os.path.getmtime(model_path)
-    for i in range(runs):
-        sim_to_gif('run_' + str(i), steps, alpha, alphabot)
-        logging.debug('Simulation %d has finished' % i)
+    alphabot = load_model(model_path, custom_objects={'categorical_weighted': keras.losses.categorical_crossentropy})
+    last_modifications = -1
 
     while True:
-        logging.debug('Sleeping')
-        time.sleep(120)
         if os.path.getmtime(model_path) != last_modifications:
             logging.debug('Model has been modified, running simulation')
             last_modifications = os.path.getmtime(model_path)
@@ -103,6 +104,8 @@ def async_sims():
             for i in range(runs):
                 sim_to_gif('run_' + str(i), steps, alpha, alphabot)
                 logging.debug('Simulation %d has finished' % i)
+        sleep(180)
+
 
 if __name__ == '__main__' or __name__ == 'application':
     # Run async simulator
