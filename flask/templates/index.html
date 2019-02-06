@@ -36,15 +36,13 @@
       })//end DOMContentLoaded
 
       function load_gif(name) {
-        const im = document.createElement('img')
-        im.setAttribute("src", name)
-        im.setAttribute("title", "gif")
-        document.body.append(im)
+	const img = document.getElementById("gif_src")
+	img.setAttribute("src", name)
       }
     </script>
     <title>Test</title>
   </head>
-  <body>
-    <!--<img src="/static/giphy.gif" title="title"></img>-->
+  <body bgcolor=#808080>
+	  <img id="gif_src" title="title"></img>
   </body>
 </html>
