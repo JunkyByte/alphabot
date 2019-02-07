@@ -5,8 +5,8 @@ from copy import copy
 null_map = -1
 
 # Define Map Params
-# MAP_SIZE = 16
-MAP_SIZE = 9
+MAP_SIZE = 13
+# MAP_SIZE = 9
 
 
 class Game():

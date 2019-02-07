@@ -3,8 +3,8 @@ import copy
 import numpy as np
 import emulator
 
-# INPUT_SIZE = (16, 16, 5)  # Map size fixed to 16x16 (2 to 3 players)
-INPUT_SIZE = (9, 9, 5)
+INPUT_SIZE = (13, 13, 5)  # Map size fixed to 16x16 (2 to 3 players)
+# INPUT_SIZE = (9, 9, 5)
 
 
 class MCTS():
@@ -28,7 +28,7 @@ class MCTS():
         if s_k not in self.tree:
             # logging.debug('New state encountered')
             self.tree.append(s_k)
-            if isinstance(alphabot, str):
+            if isinstance(alphabot, (str, bool)) or alphabot is None:  # Revert
                 ask_predict(process_id, s, alphabot)
                 raw_prediction = pipe.recv()
                 policy, value = raw_prediction['policy'], raw_prediction['value']

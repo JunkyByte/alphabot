@@ -13,7 +13,7 @@
       socket.on("new", data => {
 
       })
-
+      var name = null
       var button = document.createElement("input")
       button.setAttribute("type", "submit")
       button.setAttribute("value", "submit")
@@ -21,7 +21,7 @@
       document.body.append(button)
       document.getElementById ("submit").addEventListener("click", function() {
           const request = new XMLHttpRequest();
-          request.open("GET", "/get_name")
+          request.open("POST", "/get_name")
           request.onload = () => {
             var data = JSON.parse(request.responseText)
             if(data.success) {
@@ -30,7 +30,9 @@
               load_gif(name)
             }
           }
-          request.send()
+	  data = new FormData()
+	  data.append('name', name)
+          request.send(data)
       });
 
       })//end DOMContentLoaded
@@ -40,7 +42,7 @@
 	img.setAttribute("src", name)
       }
     </script>
-    <title>Test</title>
+    <title>Visualizer</title>
   </head>
   <body bgcolor=#808080>
 	  <img id="gif_src" title="title"></img>

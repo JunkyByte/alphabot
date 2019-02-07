@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
 from array2gif import write_gif
 import numpy as np
@@ -38,9 +38,10 @@ def update():
     emit("new", test)
 
 
-@app.route("/get_name", methods=["GET"])
+@app.route("/get_name", methods=["POST"])
 def get_name():
-    all_files = [file for file in os.listdir('./static/') if file.endswith('.gif')]
+    name = request.values.get('name', '')
+    all_files = [f for f in os.listdir('./static/') if f.endswith('.gif') and f not in name]
     if len(all_files) == 0:
         return jsonify({'success': False, 'name': 'nameplaceholder'})
 
@@ -49,6 +50,12 @@ def get_name():
 
     return jsonify({'success': True, 'name': os.path.join('/static/', name)})
 
+
+def round_to_closest(mapp):
+    colors = [128, 255]
+    mapp[~np.isin(mapp, colors)] = 0
+    return mapp
+    
 
 def sim_to_gif(name, steps, alpha, alphabot):
     states = simulate_game(steps, alpha, alphabot=alphabot, eval_g=True, return_state=True)
@@ -80,6 +87,7 @@ def sim_to_gif(name, steps, alpha, alphabot):
         mapp[idx, cols, 1] = 255
 
         mapp = cv2.resize(mapp.astype(np.uint8), (480, 480), interpolation=cv2.INTER_AREA)
+        mapp = round_to_closest(mapp)
         
         maps.append(mapp)
 
@@ -88,9 +96,9 @@ def sim_to_gif(name, steps, alpha, alphabot):
 
 
 def async_sims():
-    steps = 100
+    steps = 25
     alpha = 1.
-    runs = 50
+    runs = 5
     model_path = '../alphabot_best.pickle'
     logging.debug('Loading first model')
     alphabot = load_model(model_path, custom_objects={'categorical_weighted': keras.losses.categorical_crossentropy})
