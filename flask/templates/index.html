@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script>
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port)
+      document.addEventListener('DOMContentLoaded', () => {
+        socket.on('connect', () => {
+        console.log("inside socket connect")
+          socket.emit("ready")
+        });
+
+      socket.on("new", data => {
+
+      })
+      var name = null
+      var button = document.createElement("input")
+      button.setAttribute("type", "submit")
+      button.setAttribute("value", "submit")
+      button.setAttribute("id", "submit")
+      document.body.append(button)
+      document.getElementById ("submit").addEventListener("click", function() {
+          const request = new XMLHttpRequest();
+          request.open("POST", "/get_name")
+          request.onload = () => {
+            var data = JSON.parse(request.responseText)
+            if(data.success) {
+              name = data["name"]
+              console.log(name)
+              load_gif(name)
+            }
+          }
+	  data = new FormData()
+	  data.append('name', name)
+          request.send(data)
+      });
+
+      })//end DOMContentLoaded
+
+      function load_gif(name) {
+	const img = document.getElementById("gif_src")
+	img.setAttribute("src", name)
+      }
+    </script>
+    <title>Visualizer</title>
+  </head>
+  <body bgcolor=#808080>
+	  <img id="gif_src" title="title"></img>
+  </body>
+</html>
