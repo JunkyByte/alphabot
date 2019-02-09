@@ -8,6 +8,7 @@ import keras
 from keras.models import load_model
 from multiprocessing import Process
 from time import sleep
+import tensorflow as tf
 import os
 import logging
 sys.path.append('../src/')
@@ -98,10 +99,10 @@ def sim_to_gif(name, steps, alpha, alphabot):
 def async_sims():
     steps = 25
     alpha = 1.
-    runs = 5
+    runs = 3
     model_path = '../alphabot_best.pickle'
     logging.debug('Loading first model')
-    alphabot = load_model(model_path, custom_objects={'categorical_weighted': keras.losses.categorical_crossentropy})
+    alphabot = load_model(model_path, custom_objects={'categorical_weighted': keras.losses.categorical_crossentropy, 'tf': tf})
     last_modifications = -1
 
     while True:
