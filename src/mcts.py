@@ -3,7 +3,7 @@ import copy
 import numpy as np
 import emulator
 
-INPUT_SIZE = (6, 6, 5)  # Map size fixed to 16x16 (2 to 3 players)
+INPUT_SIZE = (5, 5, 5)  # Map size fixed to 16x16 (2 to 3 players)
 
 
 class MCTS():

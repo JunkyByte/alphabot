@@ -5,7 +5,7 @@ from copy import copy
 null_map = -1
 
 # Define Map Params
-MAP_SIZE = 6
+MAP_SIZE = 5
 
 
 class Game():
@@ -26,7 +26,7 @@ class Game():
 
         def random_position(mapp):
             while True:
-                position = tuple(np.random.randint(0, self.MAP_SIZE - 2, size=2))
+                position = tuple(np.random.randint(0, self.MAP_SIZE - 1, size=2))
                 if mapp[position] == null_map and self.nobody_around(position, mapp):
                     return position
 

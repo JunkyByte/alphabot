@@ -93,13 +93,20 @@ def sim_to_gif(name, steps, alpha, alphabot):
         maps.append(mapp)
 
     maps = np.array(maps)
-    write_gif(maps, os.path.join('./static/', name + '.gif'), fps=5)
+
+    gif_path = os.path.join('./static/', name + '.gif')
+    try:
+        os.remove(gif_path)
+    except Exception:
+        pass
+
+    write_gif(maps, gif_path, fps=5)
 
 
 def async_sims():
-    steps = 25
+    steps = 30
     alpha = 1.
-    runs = 3
+    runs = 5
     model_path = '../alphabot_best.pickle'
     logging.debug('Loading first model')
     alphabot = load_model(model_path, custom_objects={'categorical_weighted': keras.losses.categorical_crossentropy, 'tf': tf})
