@@ -2,8 +2,9 @@ import logging
 import copy
 import numpy as np
 import emulator
+import time
 
-INPUT_SIZE = (5, 5, 5)  # Map size fixed to 16x16 (2 to 3 players)
+INPUT_SIZE = (16, 16, 5)  # Map size fixed to 16x16 (2 to 3 players)
 
 
 class MCTS():
@@ -167,6 +168,18 @@ def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None,
     x = tree.N[to_hash(s)]
     x = x / sum(x)
     return x
+
+
+def time_search(move_time, s, mapp, game, tree, alphabot):
+    t = time.time()
+    counter = 0
+    while time.time() - t < move_time:
+        tree.search(s, mapp, game, None, None, None, alphabot=alphabot, allow_move=False)
+        counter += 1
+
+    x = tree.N[to_hash(s)]
+    x = x / sum(x)
+    return x, counter
 
 
 def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, alphabot=None, eval_g=False, return_state=False):
