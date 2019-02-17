@@ -5,7 +5,7 @@ from copy import copy
 null_map = -1
 
 # Define Map Params
-MAP_SIZE = 5
+MAP_SIZE = 16
 
 
 class Game():
@@ -21,8 +21,13 @@ class Game():
         return mapp[x, y] == mapp[x, y + 1] == mapp[x, y - 1] == mapp[x + 1, y] == mapp[x + 1, y + 1] == \
             mapp[x + 1, y - 1] == mapp[x - 1, y] == mapp[x - 1, y + 1] == mapp[x - 1, y - 1]
 
-    def reset(self):
+    def reset(self, starting_positions=None):
         mapp = np.full((self.MAP_SIZE, self.MAP_SIZE), fill_value=null_map, dtype=np.int)
+        if starting_positions:
+            mapp[starting_positions[0]] = 0
+            mapp[starting_positions[1]] = 1
+
+            return mapp
 
         def random_position(mapp):
             while True:
