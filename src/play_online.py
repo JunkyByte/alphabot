@@ -11,13 +11,13 @@ import logging
 import numpy as np
 import copy
 import os
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-# os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-alphabot = load_model('../alphabot_best.pickle', custom_objects={'categorical_weighted': mse, 'tf': tf})
+alphabot = load_model('../selected/smaller_standard.pickle', custom_objects={'categorical_weighted': mse, 'tf': tf})
 url = 'https://lightningbot.tk/api/test'
-bot_name = 'alphabot' + str(random.randint(0, 99))
+bot_name = 'alphabot'  # + str(random.randint(0, 99))
 response = requests.get('/'.join([url, 'connect', bot_name]))  # Ask the server a token to play the game
 connect = json.loads(response.text)  # Get the answer as a json to read it easily
 assert connect['success'], connect
@@ -91,10 +91,10 @@ def play_game():
 
     running = True
     count_turn = 1
-    time_to_move = 1.65  # Time in seconds to pick a move
+    time_to_move = 1.6  # Time in seconds to pick a move
     time.sleep(info['wait'] / 1000)
     while running:
-        policy, steps_done = time_search(time_to_move, s, mapp, game, mcts_tree, alphabot)
+        policy, steps_done, v = time_search(time_to_move, s, mapp, game, mcts_tree, alphabot)
         action = np.argmax(policy)
         result = move_bot(action, count_turn)  # Move the bot and store the result of the request in a variable
         running = result['success']
@@ -102,7 +102,8 @@ def play_game():
 
         logging.info('turn: %s' % count_turn)
         logging.info('steps_done: %s' % steps_done)
-        # logging.info('time_left: %s' % result['wait'])
+        logging.info('Value: %s' % v)
+        logging.info('Policy: %s' % policy)
 
         time.sleep(max(0, result['wait'] / 1000))  # Wait until the next turn
         verify, action_enemy, response = get_direction(count_turn, player_index)
@@ -111,9 +112,12 @@ def play_game():
             return 42
 
         mapp, tmp_head = game.step(mapp, s, action, 0, mcts=True)  # Process player turn
-        mapp, tmp_head = game.step(mapp, s, action_enemy, 1, mcts=True)  # Process enemy turn
+        mapp, _ = game.step(mapp, s, action_enemy, 1, mcts=True)  # Process enemy turn
         s = map_to_state(mapp, old_mapp, s, 0, tmp_head)
         old_mapp = np.array(mapp)
+
+        printable_map = s[..., 0] + s[..., 2] + s[..., 1] + s[..., 3] * 2
+        logging.info('\n' + str(printable_map))
 
 
 if __name__ == '__main__':

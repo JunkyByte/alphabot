@@ -1,4 +1,3 @@
-import logging
 import copy
 import numpy as np
 import emulator
@@ -179,7 +178,10 @@ def time_search(move_time, s, mapp, game, tree, alphabot):
 
     x = tree.N[to_hash(s)]
     x = x / sum(x)
-    return x, counter
+    _, value = alphabot.predict(s[np.newaxis].astype(np.float32))
+    value = value[0]
+
+    return x, counter, value
 
 
 def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, alphabot=None, eval_g=False, return_state=False):
