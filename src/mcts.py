@@ -160,12 +160,12 @@ def process_map(gmap, gmap_old, state, idx, head_pos=None):
 
 
 def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None,
-              process_id=None, alphabot=None, allow_move=False):
+              process_id=None, alphabot=None, allow_move=False, tau=1):
     for i in range(n):
         tree.search(s, mapp, game, pipe, ask_predict, process_id, alphabot=alphabot, allow_move=allow_move)
 
     x = tree.N[to_hash(s)]
-    x = x / sum(x)
+    x = np.power(x, 1 / tau) / sum(np.power(x, 1 / tau))
     return x
 
 
@@ -192,6 +192,7 @@ def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, al
     tree.alpha = alpha
 
     old_mapp = None
+    count_turn = 0
     turn = 0
     s = map_to_state(mapp, old_mapp, None, 0)
     old_mapp = copy.deepcopy(mapp)
@@ -199,10 +200,15 @@ def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, al
 
     states = []
     policies = []
+    tau = 1
     while not game.game_ended():
+        count_turn += 1 / 2
         states.append(np.array(s))
 
-        policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot)
+        if count_turn > INPUT_SIZE[0]:
+            tau = 1e-1
+
+        policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot, tau=tau)
         if eval_g:
             choosen = np.argmax(policy)
         else:

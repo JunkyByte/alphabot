@@ -11,13 +11,13 @@ import logging
 import numpy as np
 import copy
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+#os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-alphabot = load_model('../selected/smaller_standard.pickle', custom_objects={'categorical_weighted': mse, 'tf': tf})
+alphabot = load_model('../alphabot_best.pickle', custom_objects={'categorical_weighted': mse, 'tf': tf})
 url = 'https://lightningbot.tk/api/test'
-bot_name = 'alphabot'  # + str(random.randint(0, 99))
+bot_name = 'alphabot'  + str(random.randint(0, 99))
 response = requests.get('/'.join([url, 'connect', bot_name]))  # Ask the server a token to play the game
 connect = json.loads(response.text)  # Get the answer as a json to read it easily
 assert connect['success'], connect
@@ -86,6 +86,7 @@ def play_game():
     old_mapp = None
     mapp = game.reset(starting_positions)
     mcts_tree = MCTS()
+    mcts_tree.alpha = 0.8
     s = map_to_state(mapp, old_mapp, None, 0)
     old_mapp = copy.copy(mapp)
 

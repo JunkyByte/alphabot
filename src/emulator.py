@@ -13,6 +13,8 @@ class Game():
         self.n_players = n_players
         self.MAP_SIZE = MAP_SIZE  # emulator_utils.get_map_size(self.n_players)
         self.dir_name = {0: 'right', 1: 'down', 2: 'left', 3: 'up'}
+        self.name_dir = {'right': 0, 'down': 1, 'left': 2, 'up': 3}
+
         self.dir_vect = {'right': (0, 1), 'down': (1, 0), 'left': (0, -1), 'up': (-1, 0)}
         self.reward = 0
 
