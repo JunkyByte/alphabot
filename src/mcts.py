@@ -3,16 +3,15 @@ import numpy as np
 import emulator
 import time
 
-INPUT_SIZE = (16, 16, 5)  # Map size fixed to 16x16 (2 to 3 players)
-
 
 class MCTS():
-    def __init__(self):
+    def __init__(self, map_size):
         self.tree = []
         self.P = {}
         self.Q = {}
         self.N = {}
         self.alpha = 0.8
+        self.INPUT_SIZE = (map_size, map_size, 5)
  
     def search(self, s, mapp, game, pipe, ask_predict, process_id, allow_move=False, alphabot=None, head_pos=None):
         # logging.debug('Starting search')
@@ -54,11 +53,9 @@ class MCTS():
         max_u, best_a = -float('inf'), -1
         if not allow_move:
             valid_actions = game.valid_actions(mapp, s, turn)
-            # valid_actions = [0, 1, 2, 3]
         else:
             valid_actions = [0, 1, 2, 3]
 
-        # logging.debug('Evaluating UCB')
         for a in valid_actions:  # The actions
             if self.Q[s_k][a] != -100:
                 u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k])) / (1 + self.N[s_k][a])
@@ -79,7 +76,7 @@ class MCTS():
         turn = 1 - turn
         
         if turn == 0:  # We update the state
-            sp = map_to_state(new_map, mapp, s, 0, head_pos)
+            sp = map_to_state(new_map, mapp, s, 0, self.INPUT_SIZE, head_pos)
         else:
             # But we have to change the point of view of it!
             sp = copy.copy(s)
@@ -120,17 +117,17 @@ def get_turn(x):
     return idx[np.argmin(count)]
 
 
-def map_to_state(gmap, gmap_old, state, turn, head_pos=None):
+def map_to_state(gmap, gmap_old, state, turn, INPUT_SIZE, head_pos=None):
     if type(gmap_old) != np.ndarray:
         gmap_old = np.full_like(gmap, -1)
 
     states = np.empty(INPUT_SIZE, dtype=np.int)
 
-    states = process_map(gmap, gmap_old, state, turn, head_pos)
+    states = process_map(gmap, gmap_old, state, turn, INPUT_SIZE, head_pos)
     return states
 
 
-def process_map(gmap, gmap_old, state, idx, head_pos=None):
+def process_map(gmap, gmap_old, state, idx, INPUT_SIZE, head_pos=None):
     pov_0 = np.zeros((*INPUT_SIZE[:2], 1), dtype=np.int)
     pov_0_last = np.zeros((*INPUT_SIZE[:2], 1), dtype=np.int)
     pov_1 = np.zeros((*INPUT_SIZE[:2], 1), dtype=np.int)
@@ -184,7 +181,9 @@ def time_search(move_time, s, mapp, game, tree, alphabot):
     return x, counter, value
 
 
-def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, alphabot=None, eval_g=False, return_state=False):
+def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process_id=None,
+                  alphabot=None, eval_g=False, return_state=False):
+
     game = emulator.Game(2)
     mapp = game.reset()
 
@@ -194,7 +193,7 @@ def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, al
     old_mapp = None
     count_turn = 0
     turn = 0
-    s = map_to_state(mapp, old_mapp, None, 0)
+    s = map_to_state(mapp, old_mapp, None, INPUT_SIZE, 0)
     old_mapp = copy.deepcopy(mapp)
     head = None
 
@@ -205,7 +204,7 @@ def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, al
         count_turn += 1 / 2
         states.append(np.array(s))
 
-        if count_turn > INPUT_SIZE[0]:
+        if count_turn > INPUT_SIZE[0] // 2:
             tau = 1e-1
 
         policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot, tau=tau)
@@ -219,21 +218,14 @@ def simulate_game(steps, alpha, pipe=None, ask_predict=None, process_id=None, al
 
         turn = 1 - turn
         if turn == 0:  # We update the state
-            s = map_to_state(mapp, old_mapp, s, 0, head)  # TODO: Map to state
+            s = map_to_state(mapp, old_mapp, s, 0, INPUT_SIZE, head)
         else:
-            head = tmp_head 
+            head = tmp_head
             s[..., -1] = 1
 
         if turn == 0:
             old_mapp = np.array(mapp)
 
-        # logging.debug('Turn of %d Policy was %s Took action %s' % (1 - turn, np.round(policy, 2), game.dir_name[choosen]))
-        # printable_state = map_to_state(mapp, old_mapp, s, 0)
-        # printable_mapp = copy.copy(mapp)
-        # printable_mapp[np.where(printable_state[..., 1] == 1)] = 2
-        # printable_mapp[np.where(printable_state[..., 3] == 1)] = 3
-        # logging.debug('\n' + str(printable_mapp).replace('-1', '--'))
-        
         if game.game_ended():
             winner = turn
             # logging.debug('Game ended %d won' % (winner))

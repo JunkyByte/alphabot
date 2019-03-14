@@ -1,15 +1,11 @@
 import numpy as np
 import emulator_utils
-##import emulator_vis
 from copy import copy
 null_map = -1
 
-# Define Map Params
-MAP_SIZE = 16
-
 
 class Game():
-    def __init__(self, n_players):
+    def __init__(self, n_players, MAP_SIZE):
         self.n_players = n_players
         self.MAP_SIZE = MAP_SIZE  # emulator_utils.get_map_size(self.n_players)
         self.dir_name = {0: 'right', 1: 'down', 2: 'left', 3: 'up'}
@@ -17,6 +13,7 @@ class Game():
 
         self.dir_vect = {'right': (0, 1), 'down': (1, 0), 'left': (0, -1), 'up': (-1, 0)}
         self.reward = 0
+        self.MAP_SIZE = MAP_SIZE
 
     def nobody_around(self, position, mapp):
         x, y = position
