@@ -1,8 +1,9 @@
 from keras.layers import *
 from keras.regularizers import l2
 from keras.models import Model
-from keras.utils import multi_gpu_model
 import tensorflow as tf
+
+INPUT_SIZE = (16, 16, 5)
 
 # Convolutional Block
 def conv_block(in_layer, name, filters, kernel_size=(3, 3), bn=True, relu=True):
@@ -17,10 +18,12 @@ def conv_block(in_layer, name, filters, kernel_size=(3, 3), bn=True, relu=True):
 
 
 # Residual Block
-def residual_conv(in_layer, idx, filters, kernel_size=(3, 3), bn=True, relu=True):
+def residual_conv(in_layer, first_conv, idx, filters, kernel_size=(3, 3), bn=True, relu=True):
     name = 'res_' + str(idx)
     # Full conv block of pre-defined shape
     l = conv_block(in_layer, name + '_conv1', filters, kernel_size=(3, 3), bn=True, relu=True)
+    l = ZeroConv()([first_conv, l])
+
     # Second block with skip connection
     l = Conv2D(filters, kernel_size, use_bias = False, padding='same', 
                name = name + '_conv2', kernel_regularizer=l2(1e-4))(l)
@@ -28,17 +31,19 @@ def residual_conv(in_layer, idx, filters, kernel_size=(3, 3), bn=True, relu=True
         l = BatchNormalization(axis=3, name = name + '_conv2_bn')(l)
     
     l = Add()([in_layer, l])  # Skip conn.
-    
     if relu:
         l = Activation('relu', name=name + '_relu')(l)
-        
+
+    l = ZeroConv()([first_conv, l])
+
     return l
 
 
-def value_head(in_layer):
+def value_head(in_layer, first_conv):
     l = conv_block(in_layer, 'value_head', filters=1, kernel_size=(1,1))
-    l = Flatten(name = 'value_flatten')(l)
+    l = ZeroConv()([first_conv, l])
 
+    l = Flatten(name = 'value_flatten')(l)
     l = Dense(128, use_bias=False, kernel_regularizer=l2(1e-4), activation='relu', 
               name = 'value_dense')(l)
 
@@ -49,9 +54,9 @@ def value_head(in_layer):
     return l
 
 
-def policy_head(in_layer):
-    l = conv_block(in_layer, 'policy_head', filters=2, kernel_size=(1,1),
-                   kernel_regularizer=l2(1e-4))
+def policy_head(in_layer, first_conv):
+    l = conv_block(in_layer, 'policy_head', filters=2, kernel_size=(1,1))
+    l = ZeroConv()([first_conv, l])
 
     l = Flatten(name = 'policy_flatten')(l)
     l = Dense(4, name = 'policy', use_bias = False, kernel_regularizer=l2(1e-4),
@@ -69,25 +74,26 @@ class ZeroConv(Layer):
 
     def call(self, x):
         prev_conv, next_conv = x
-        zero_mask = tf.equal(prev_conv, 0)
-        one_mask = tf.math.logical_not(zero_mask)
+        one_mask = tf.not_equal(prev_conv, 0)
+        one_mask = one_mask[:, :, :, :tf.shape(next_conv)[-1]] 
         one_mask = tf.cast(one_mask, next_conv.dtype)
 
         return next_conv * one_mask + next_conv * 0
 
     def compute_output_shape(self, input_shape):
-        return input_shape
+        return input_shape[1]
 
 
 def declare_model(n_channels, n_residual):
 
     input_layer = Input(INPUT_SIZE)
-    l = conv_block(input_layer, 'conv')
+    first_conv = conv_block(input_layer, 'conv', n_channels)
+    l = first_conv
     for i in range(n_residual):
-        l = residual_conv(l, idx=i + 1, filters=n_channels)
+        l = residual_conv(l, first_conv, idx=i + 1, filters=n_channels)
 
-    policy = policy_head(l)
-    value = value_head(l)
+    policy = policy_head(l, first_conv)
+    value = value_head(l, first_conv)
 
     alphabot = Model(input_layer, [policy, value])
     return alphabot

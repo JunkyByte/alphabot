@@ -21,7 +21,7 @@ class MCTS():
             game.reward = 0
             return -reward
 
-        turn = s[..., -1].all() == 1 
+        turn = s[..., -1].all() == 1
         if s_k not in self.tree:
             # logging.debug('New state encountered')
             self.tree.append(s_k)
@@ -176,9 +176,6 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
     game = emulator.Game(2, INPUT_SIZE)
     mapp = game.reset()
 
-    tree = MCTS()
-    tree.alpha = alpha
-
     old_mapp = None
     count_turn = 0
     turn = 0
@@ -190,6 +187,9 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
     policies = []
     tau = 1
     while not game.game_ended():
+        tree = MCTS()
+        tree.alpha = alpha
+
         count_turn += 1 / 2
         states.append(np.array(s))
 
@@ -207,7 +207,7 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
 
         turn = 1 - turn
         if turn == 0:  # We update the state
-            s = map_to_state(mapp, old_mapp, s, 0, INPUT_SIZE, head)
+            s = map_to_state(mapp, old_mapp, s, 0, head)
         else:
             head = tmp_head
             s[..., -1] = 1
@@ -221,18 +221,19 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
             if return_state:
                 return states
 
-            train_steps = divide_states(winner, states, policies)
+            train_steps = divide_states(winner, states, policies, INPUT_SIZE)
             return train_steps
 
 
 class TrainStep():
-    def __init__(self, state, value, policy):
+    def __init__(self, state, value, policy, map_size):
         self.state = state
         self.value = value
         self.policy = policy
+        self.map_size = map_size
 
 
-def divide_states(winner, states, policies):
+def divide_states(winner, states, policies, INPUT_SIZE):
     train_steps = []
 
     for state, policy in zip(states, policies):
@@ -240,10 +241,10 @@ def divide_states(winner, states, policies):
             value = 1
         else:
             value = -1
-        train_steps.append(TrainStep(state, value, policy))
+        train_steps.append(TrainStep(state, value, policy, INPUT_SIZE))
         
         new_state = state[:, :, [2, 3, 0, 1, 4]]
         new_state[..., -1] = np.ones_like(new_state[..., -1]) - new_state[..., -1]
-        train_steps.append(TrainStep(new_state, value, policy))
+        train_steps.append(TrainStep(new_state, value, policy, INPUT_SIZE))
     
     return train_steps
