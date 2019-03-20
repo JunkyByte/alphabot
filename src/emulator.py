@@ -7,7 +7,6 @@ null_map = -1
 class Game():
     def __init__(self, n_players, MAP_SIZE):
         self.n_players = n_players
-        self.MAP_SIZE = MAP_SIZE  # emulator_utils.get_map_size(self.n_players)
         self.dir_name = {0: 'right', 1: 'down', 2: 'left', 3: 'up'}
         self.name_dir = {'right': 0, 'down': 1, 'left': 2, 'up': 3}
 
@@ -21,7 +20,8 @@ class Game():
             mapp[x + 1, y - 1] == mapp[x - 1, y] == mapp[x - 1, y + 1] == mapp[x - 1, y - 1]
 
     def reset(self, starting_positions=None):
-        mapp = np.full((self.MAP_SIZE, self.MAP_SIZE), fill_value=null_map, dtype=np.int)
+        # mapp = np.full((self.MAP_SIZE, self.MAP_SIZE), fill_value=null_map, dtype=np.int)
+        mapp = np.full((16, 16), fill_value=null_map, dtype=np.int)
         if starting_positions:
             mapp[starting_positions[0]] = 0
             mapp[starting_positions[1]] = 1
