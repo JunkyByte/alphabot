@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import emulator
 import time
-FULL_SIZE = (16, 16, 5)
+FULL_SIZE = (16, 16, 6)
 
 class MCTS():
     def __init__(self):
@@ -12,7 +12,8 @@ class MCTS():
         self.N = {}
         self.alpha = 0.8
 
-    def search(self, s, mapp, game, pipe, ask_predict, process_id, allow_move=False, alphabot=None, head_pos=None):
+    def search(self, s, mapp, game, pipe, ask_predict, process_id, INPUT_SIZE, 
+               allow_move=False, alphabot=None, head_pos=None):
         # logging.debug('Starting search')
         s_k = to_hash(s)
         if game.game_ended():
@@ -75,14 +76,15 @@ class MCTS():
         turn = 1 - turn
         
         if turn == 0:  # We update the state
-            sp = map_to_state(new_map, mapp, s, 0, head_pos)
+            sp = map_to_state(new_map, mapp, s, 0, INPUT_SIZE, head_pos)
         else:
             # But we have to change the point of view of it!
             sp = copy.copy(s)
             head_pos = tmp_head
             sp[..., -1] = 1
         
-        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, allow_move, alphabot, head_pos)
+        v = self.search(sp, new_map, game, pipe, ask_predict, process_id, INPUT_SIZE,
+                        allow_move, alphabot, head_pos)
         
         if self.Q[s_k][a] == -100:
             self.Q[s_k][a] = v
@@ -107,17 +109,17 @@ def to_hash(state):
     return hash(state.tostring())
 
 
-def map_to_state(gmap, gmap_old, state, turn, head_pos=None):
+def map_to_state(gmap, gmap_old, state, turn, INPUT_SIZE, head_pos=None):
     if type(gmap_old) != np.ndarray:
         gmap_old = np.full_like(gmap, -1)
 
     states = np.empty(FULL_SIZE, dtype=np.int)
 
-    states = process_map(gmap, gmap_old, state, turn, head_pos)
+    states = process_map(gmap, gmap_old, state, turn, INPUT_SIZE, head_pos)
     return states
 
 
-def process_map(gmap, gmap_old, state, idx, head_pos=None):
+def process_map(gmap, gmap_old, state, idx, INPUT_SIZE, head_pos=None):
     pov_0 = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
     pov_0_last = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
     pov_1 = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
@@ -142,24 +144,31 @@ def process_map(gmap, gmap_old, state, idx, head_pos=None):
         pov_1_last = np.expand_dims(state[..., 3], axis=-1)
 
     turn_m = np.full((*FULL_SIZE[:2], 1), dtype=np.int, fill_value=idx)
-    return np.concatenate([pov_0, pov_0_last, pov_1, pov_1_last, turn_m], axis=2)
+
+    mask = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
+    mask_ones = np.ones((INPUT_SIZE, INPUT_SIZE, 1), dtype=np.int)
+    mask[:INPUT_SIZE, :INPUT_SIZE] = mask_ones
+
+    return np.concatenate([pov_0, pov_0_last, pov_1, pov_1_last, mask, turn_m], axis=2)
 
 
-def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None,
+def do_search(n, s, mapp, game, tree, INPUT_SIZE, pipe=None, ask_predict=None,
               process_id=None, alphabot=None, allow_move=False, tau=1):
     for i in range(n):
-        tree.search(s, mapp, game, pipe, ask_predict, process_id, alphabot=alphabot, allow_move=allow_move)
+        tree.search(s, mapp, game, pipe, ask_predict, process_id, INPUT_SIZE,
+                    alphabot=alphabot, allow_move=allow_move)
 
     x = tree.N[to_hash(s)]
     x = np.power(x, 1 / tau) / sum(np.power(x, 1 / tau))
     return x
 
 
-def time_search(move_time, s, mapp, game, tree, alphabot):
+def time_search(move_time, s, mapp, game, tree, alphabot, INPUT_SIZE=16):
     t = time.time()
     counter = 0
     while time.time() - t < move_time:
-        tree.search(s, mapp, game, None, None, None, alphabot=alphabot, allow_move=False)
+        tree.search(s, mapp, game, None, None, None, INPUT_SIZE,
+                    alphabot=alphabot, allow_move=False)
         counter += 1
 
     x = tree.N[to_hash(s)]
@@ -179,7 +188,7 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
     old_mapp = None
     count_turn = 0
     turn = 0
-    s = map_to_state(mapp, old_mapp, None, 0)
+    s = map_to_state(mapp, old_mapp, None, 0, INPUT_SIZE)
     old_mapp = copy.deepcopy(mapp)
     head = None
 
@@ -196,7 +205,9 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
         if count_turn > INPUT_SIZE // 2:
             tau = 1e-1
 
-        policy = do_search(steps, s, mapp, game, tree, pipe, ask_predict, process_id, alphabot=alphabot, tau=tau)
+        policy = do_search(steps, s, mapp, game, tree, INPUT_SIZE, pipe, ask_predict, process_id,
+                           alphabot=alphabot, tau=tau)
+
         if eval_g:
             choosen = np.argmax(policy)
         else:
@@ -207,7 +218,7 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
 
         turn = 1 - turn
         if turn == 0:  # We update the state
-            s = map_to_state(mapp, old_mapp, s, 0, head)
+            s = map_to_state(mapp, old_mapp, s, 0, INPUT_SIZE, head)
         else:
             head = tmp_head
             s[..., -1] = 1
@@ -243,7 +254,7 @@ def divide_states(winner, states, policies, INPUT_SIZE):
             value = -1
         train_steps.append(TrainStep(state, value, policy, INPUT_SIZE))
         
-        new_state = state[:, :, [2, 3, 0, 1, 4]]
+        new_state = state[:, :, [2, 3, 0, 1, 4, 5]]
         new_state[..., -1] = np.ones_like(new_state[..., -1]) - new_state[..., -1]
         train_steps.append(TrainStep(new_state, value, policy, INPUT_SIZE))
     

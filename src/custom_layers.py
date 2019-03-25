@@ -3,7 +3,7 @@ from keras.regularizers import l2
 from keras.models import Model
 import tensorflow as tf
 
-INPUT_SIZE = (16, 16, 5)
+INPUT_SIZE = (16, 16, 6)
 
 # Convolutional Block
 def conv_block(in_layer, name, filters, kernel_size=(3, 3), bn=True, relu=True):
