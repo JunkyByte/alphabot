@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import emulator
 import time
-FULL_SIZE = (16, 16, 4)
+FULL_SIZE = (16, 16, 5)
 
 
 class MCTS():
