@@ -11,11 +11,12 @@ import logging
 import numpy as np
 import copy
 import os
+from custom_layers import ZeroConv
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-alphabot = load_model('../alphabot_best.pickle', custom_objects={'categorical_weighted': mse, 'tf': tf})
+alphabot = load_model('../alphabot_best.pickle', custom_objects={'ZeroConv' : ZeroConv, 'tf': tf})
 url = 'https://lightningbot.tk/api/test'
 bot_name = 'alphabot'  + str(random.randint(0, 99))
 response = requests.get('/'.join([url, 'connect', bot_name]))  # Ask the server a token to play the game
@@ -82,20 +83,20 @@ def play_game():
     starting_positions = list(process_positions(positions, player_index, map_size))
 
     # Setup Monte Carlo tree / Map
-    game = emulator.Game(2)
+    game = emulator.Game(2, MAP_SIZE=16)
     old_mapp = None
     mapp = game.reset(starting_positions)
     mcts_tree = MCTS()
-    mcts_tree.alpha = 0.8
-    s = map_to_state(mapp, old_mapp, None, 0)
+    mcts_tree.alpha = 1.1
+    s = map_to_state(mapp, old_mapp, None, 0, INPUT_SIZE=16)
     old_mapp = copy.copy(mapp)
 
     running = True
     count_turn = 1
-    time_to_move = 1.6  # Time in seconds to pick a move
+    time_to_move = 1.3  # Time in seconds to pick a move
     time.sleep(info['wait'] / 1000)
     while running:
-        policy, steps_done, v = time_search(time_to_move, s, mapp, game, mcts_tree, alphabot)
+        policy, steps_done, v = time_search(time_to_move, s, mapp, game, mcts_tree, alphabot, INPUT_SIZE=16)
         action = np.argmax(policy)
         result = move_bot(action, count_turn)  # Move the bot and store the result of the request in a variable
         running = result['success']
@@ -114,7 +115,7 @@ def play_game():
 
         mapp, tmp_head = game.step(mapp, s, action, 0, mcts=True)  # Process player turn
         mapp, _ = game.step(mapp, s, action_enemy, 1, mcts=True)  # Process enemy turn
-        s = map_to_state(mapp, old_mapp, s, 0, tmp_head)
+        s = map_to_state(mapp, old_mapp, s, 0, 16, tmp_head)
         old_mapp = np.array(mapp)
 
         printable_map = s[..., 0] + s[..., 2] + s[..., 1] + s[..., 3] * 2

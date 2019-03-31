@@ -60,8 +60,7 @@ class Game():
         return valid_actions
 
     def get_head(self, state, turn):
-        channel_index = 2 * turn + 1  # This is the channel where the head is located
-        head_channel = state[..., channel_index]
+        head_channel = state[..., turn]
         return np.where(head_channel == 1)  # Where's the head?
 
     def step(self, p, state, action, turn, mcts=False):
@@ -77,8 +76,6 @@ class Game():
         new_position = self.sanitize_positions(emulator_utils.sum_tuple(head_position, direction))
 
         point = mapp[new_position]
-        # if self.valid_actions(mapp, state, turn) == []:
-        #    self.reward = 1
 
         if point != null_map:
             self.reward = 1  # Game ended
