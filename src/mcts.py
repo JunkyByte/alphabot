@@ -4,6 +4,7 @@ import emulator
 import time
 FULL_SIZE = (16, 16, 6)
 
+
 class MCTS():
     def __init__(self):
         self.tree = []
@@ -12,7 +13,7 @@ class MCTS():
         self.N = {}
         self.alpha = 0.8
 
-    def search(self, s, mapp, game, pipe, ask_predict, process_id, INPUT_SIZE, 
+    def search(self, s, mapp, game, pipe, ask_predict, process_id, INPUT_SIZE,
                allow_move=False, alphabot=None, head_pos=None):
         # logging.debug('Starting search')
         s_k = to_hash(s)
@@ -58,7 +59,8 @@ class MCTS():
 
         for a in valid_actions:  # The actions
             if self.Q[s_k][a] != -100:
-                u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k])) / (1 + self.N[s_k][a])
+                u = self.Q[s_k][a] + self.alpha * self.P[s_k][a] * \
+                    np.sqrt(np.sum(self.N[s_k])) / (1 + self.N[s_k][a])
             else:
                 u = self.alpha * self.P[s_k][a] * np.sqrt(np.sum(self.N[s_k]) + 1e-7)
 
@@ -93,16 +95,6 @@ class MCTS():
         self.N[s_k][a] += 1
         
         return -v
-
-
-def softmax(z):
-    z = z[np.newaxis]
-    s = np.max(z, axis=1)
-    s = s[:, np.newaxis]  # necessary step to do broadcasting
-    e_x = np.exp(z - s)
-    div = np.sum(e_x, axis=1)
-    div = div[:, np.newaxis]
-    return e_x / div
 
 
 def to_hash(state):
@@ -159,6 +151,7 @@ def do_search(n, s, mapp, game, tree, INPUT_SIZE, pipe=None, ask_predict=None,
                     alphabot=alphabot, allow_move=allow_move)
 
     x = tree.N[to_hash(s)]
+    x = 0.75 * x + 0.25 * np.random.dirichlet(0.3 * np.ones(len(x)))
     x = np.power(x, 1 / tau) / sum(np.power(x, 1 / tau))
     return x
 
@@ -180,13 +173,18 @@ def time_search(move_time, s, mapp, game, tree, alphabot, INPUT_SIZE=16):
 
 
 def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process_id=None,
-                  alphabot=None, eval_g=False, return_state=False):
+                  alphabot=None, return_state=False, count_turn=0):
 
+    if isinstance(steps, list):
+        steps_long = steps[1]
+        steps = steps[0]
+    else:
+        steps_long = steps
+
+    # Game Setup
     game = emulator.Game(2, INPUT_SIZE)
     mapp = game.reset()
-
     old_mapp = None
-    count_turn = 0
     turn = 0
     s = map_to_state(mapp, old_mapp, None, 0, INPUT_SIZE)
     old_mapp = copy.deepcopy(mapp)
@@ -201,17 +199,18 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
 
         count_turn += 1 / 2
         states.append(np.array(s))
-
-        if count_turn > INPUT_SIZE // 2:
+        
+        # Callbacks
+        if count_turn > INPUT_SIZE:
             tau = 1e-1
+
+        if count_turn > INPUT_SIZE * 3:
+            steps = steps_long
 
         policy = do_search(steps, s, mapp, game, tree, INPUT_SIZE, pipe, ask_predict, process_id,
                            alphabot=alphabot, tau=tau)
 
-        if eval_g:
-            choosen = np.argmax(policy)
-        else:
-            choosen = np.random.choice(4, p=policy)
+        choosen = np.argmax(policy)
         
         policies.append(np.array(policy))
         mapp, tmp_head = game.step(mapp, s, choosen, turn, mcts=True)

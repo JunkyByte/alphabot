@@ -13,6 +13,7 @@ import os
 import logging
 sys.path.append('../src/')
 from mcts import simulate_game
+from custom_layers import ZeroConv
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
@@ -58,8 +59,8 @@ def round_to_closest(mapp):
     return mapp
     
 
-def sim_to_gif(name, steps, alpha, alphabot):
-    states = simulate_game(steps, alpha, alphabot=alphabot, eval_g=True, return_state=True)
+def sim_to_gif(name, steps, alpha, alphabot, map_size):
+    states = simulate_game(steps, alpha, map_size, alphabot=alphabot, return_state=True)
     logging.debug('Game was successfully simulated')
 
     maps = []
@@ -105,11 +106,12 @@ def sim_to_gif(name, steps, alpha, alphabot):
 
 def async_sims():
     steps = 30
-    alpha = 1.
+    alpha = 1.1
     runs = 5
+    map_size = 9
     model_path = '../alphabot_best.pickle'
     logging.debug('Loading first model')
-    alphabot = load_model(model_path, custom_objects={'categorical_weighted': keras.losses.categorical_crossentropy, 'tf': tf})
+    alphabot = load_model(model_path, custom_objects={'ZeroConv' : ZeroConv, 'tf': tf})
     last_modifications = -1
 
     while True:
@@ -118,7 +120,7 @@ def async_sims():
             last_modifications = os.path.getmtime(model_path)
             alphabot.load_weights(model_path)
             for i in range(runs):
-                sim_to_gif('run_' + str(i), steps, alpha, alphabot)
+                sim_to_gif('run_' + str(i), steps, alpha, alphabot, map_size)
                 logging.debug('Simulation %d has finished' % i)
         sleep(180)
 
