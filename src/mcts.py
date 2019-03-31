@@ -2,7 +2,8 @@ import copy
 import numpy as np
 import emulator
 import time
-FULL_SIZE = (16, 16, 5)
+FULL_SIZE = (16, 16, 4)
+
 
 class MCTS():
     def __init__(self):
@@ -119,30 +120,32 @@ def map_to_state(gmap, gmap_old, state, turn, head_pos=None):
 
 def process_map(gmap, gmap_old, state, idx, head_pos=None):
     pov_0 = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
-    pov_0_last = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
+    pov_0_head = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
     pov_1 = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
-    pov_1_last = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
+    pov_1_head = np.zeros((*FULL_SIZE[:2], 1), dtype=np.int)
 
     pov_0[np.where(gmap == 0)] = 1  # Set to 1 where player 0 is
-    pov_0_last[np.where(gmap_old == 0)] = 1
+    pov_0_head[np.where(gmap_old == 0)] = 1
 
     pov_1[np.where(gmap == 1)] = 1  # Set to  1 where player 1 is
-    pov_1_last[np.where(gmap_old == 1)] = 1
+    pov_1_head[np.where(gmap_old == 1)] = 1
 
-    pov_0_last = pov_0 - pov_0_last
-    pov_1_last = pov_1 - pov_1_last
+    pov_0_head = pov_0 - pov_0_head
+    pov_1_head = pov_1 - pov_1_head
 
-    if sum(sum(pov_0_last)) == 0:
+    if sum(sum(pov_0_head)) == 0:
         if head_pos is not None:
-            pov_0_last[head_pos] = 1
+            pov_0_head[head_pos] = 1
         else:
-            pov_0_last = np.expand_dims(state[..., 1], axis=-1)
+            pov_0_head = np.expand_dims(state[..., 0], axis=-1)
 
-    if sum(sum(pov_1_last)) == 0:
-        pov_1_last = np.expand_dims(state[..., 3], axis=-1)
+    if sum(sum(pov_1_head)) == 0:
+        pov_1_head = np.expand_dims(state[..., 1], axis=-1)
 
     turn_m = np.full((*FULL_SIZE[:2], 1), dtype=np.int, fill_value=idx)
-    return np.concatenate([pov_0, pov_0_last, pov_1, pov_1_last, turn_m], axis=2)
+    occupied = pov_0 + pov_1
+
+    return np.concatenate([pov_0_head, pov_1_head, occupied, turn_m], axis=2)
 
 
 def do_search(n, s, mapp, game, tree, pipe=None, ask_predict=None,
@@ -242,9 +245,9 @@ def divide_states(winner, states, policies, INPUT_SIZE):
         else:
             value = -1
         train_steps.append(TrainStep(state, value, policy, INPUT_SIZE))
-        
-        new_state = state[:, :, [2, 3, 0, 1, 4]]
+
+        new_state = state[:, :, [1, 0, 2, 3]]
         new_state[..., -1] = np.ones_like(new_state[..., -1]) - new_state[..., -1]
         train_steps.append(TrainStep(new_state, value, policy, INPUT_SIZE))
-    
+
     return train_steps
