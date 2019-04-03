@@ -60,7 +60,7 @@ class Game():
         return valid_actions
 
     def get_head(self, state, turn):
-        head_channel = state[..., turn]
+        head_channel = state[..., int(turn)]
         return np.where(head_channel == 1)  # Where's the head?
 
     def step(self, p, state, action, turn, mcts=False):

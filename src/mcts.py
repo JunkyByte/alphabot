@@ -202,10 +202,10 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
         states.append(np.array(s))
         
         # Callbacks
-        if count_turn > INPUT_SIZE:
+        if count_turn > INPUT_SIZE * 2:
             tau = 1e-1
 
-        if count_turn > INPUT_SIZE * 3:
+        if count_turn > INPUT_SIZE * 2:
             steps = steps_long
 
         policy = do_search(steps, s, mapp, game, tree, INPUT_SIZE, pipe, ask_predict, process_id,

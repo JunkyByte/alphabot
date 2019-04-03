@@ -3,7 +3,7 @@ from keras.regularizers import l2
 from keras.models import Model
 import tensorflow as tf
 
-INPUT_SIZE = (16, 16, 6)
+INPUT_SIZE = (16, 16, 5)
 
 # Convolutional Block
 def conv_block(in_layer, name, filters, kernel_size=(3, 3), bn=True, relu=True):
@@ -40,11 +40,11 @@ def residual_conv(in_layer, first_conv, idx, filters, kernel_size=(3, 3), bn=Tru
 
 
 def value_head(in_layer, first_conv):
-    l = conv_block(in_layer, 'value_head', filters=1, kernel_size=(1, 1))
+    l = conv_block(in_layer, 'value_head', filters=16, kernel_size=(1, 1))
     l = ZeroConv()([first_conv, l])
 
     l = Flatten(name = 'value_flatten')(l)
-    l = Dense(128, use_bias=False, kernel_regularizer=l2(1e-4), activation='relu', 
+    l = Dense(64, use_bias=False, kernel_regularizer=l2(1e-4), activation='relu', 
               name = 'value_dense')(l)
 
     l = BatchNormalization(axis=1, name = 'value_bn')(l)
@@ -55,11 +55,11 @@ def value_head(in_layer, first_conv):
 
 
 def policy_head(in_layer, first_conv):
-    l = conv_block(in_layer, 'policy_head', filters=2, kernel_size=(1, 1))
+    l = conv_block(in_layer, 'policy_head', filters=16, kernel_size=(1, 1))
     l = ZeroConv()([first_conv, l])
 
     l = Flatten(name = 'policy_flatten')(l)
-    l = Dense(128, use_bias=False, kernel_regularizer=l2(1e-4), activation='relu',
+    l = Dense(64, use_bias=False, kernel_regularizer=l2(1e-4), activation='relu',
               name='policy_dense')(l)
     
     l = BatchNormalization(axis=1, name='policy_bn')(l)
