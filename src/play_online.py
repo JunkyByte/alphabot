@@ -77,10 +77,12 @@ def play_game():
     logging.info('Info Phase')
     logging.info('Game Name: %s' % info['name'])
     logging.info('Bot Name: %s' % bot_name)
+    logging.info('Map Size: %s' % info['dimensions'])
     map_size = info['dimensions']
     positions = info['positions']
     player_index = get_index(positions)
     starting_positions = list(process_positions(positions, player_index, map_size))
+    logging.info('Starting Positions: %s' % starting_positions)
 
     # Setup Monte Carlo tree / Map
     game = emulator.Game(2, MAP_SIZE=16)
@@ -93,7 +95,7 @@ def play_game():
 
     running = True
     count_turn = 1
-    time_to_move = 1.3  # Time in seconds to pick a move
+    time_to_move = 1.2  # Time in seconds to pick a move
     time.sleep(info['wait'] / 1000)
     while running:
         policy, steps_done, v = time_search(time_to_move, s, mapp, game, mcts_tree, alphabot, INPUT_SIZE=16)
@@ -118,7 +120,7 @@ def play_game():
         s = map_to_state(mapp, old_mapp, s, 0, 16, tmp_head)
         old_mapp = np.array(mapp)
 
-        printable_map = s[..., 0] + s[..., 2] + s[..., 1] + s[..., 3] * 2
+        printable_map = s[..., 0] + s[..., 1] * 2 + s[..., 2]
         logging.info('\n' + str(printable_map))
 
 
