@@ -20,7 +20,6 @@ class Game():
             mapp[x + 1, y - 1] == mapp[x - 1, y] == mapp[x - 1, y + 1] == mapp[x - 1, y - 1]
 
     def reset(self, starting_positions=None):
-        # mapp = np.full((self.MAP_SIZE, self.MAP_SIZE), fill_value=null_map, dtype=np.int)
         mapp = np.full((16, 16), fill_value=null_map, dtype=np.int)
         if starting_positions:
             mapp[starting_positions[0]] = 0

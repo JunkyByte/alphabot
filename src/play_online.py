@@ -12,8 +12,8 @@ import numpy as np
 import copy
 import os
 from custom_layers import ZeroConv
-#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-#os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 alphabot = load_model('../alphabot_best.pickle', custom_objects={'ZeroConv' : ZeroConv, 'tf': tf})
@@ -95,8 +95,7 @@ def play_game():
 
     running = True
     count_turn = 1
-    time_to_move = 1.2  # Time in seconds to pick a move
-    time.sleep(info['wait'] / 1000)
+    time_to_move = info['wait'] / 1000  # Time in seconds to pick a move
     while running:
         policy, steps_done, v = time_search(time_to_move, s, mapp, game, mcts_tree, alphabot, INPUT_SIZE=16)
         action = np.argmax(policy)
@@ -110,6 +109,8 @@ def play_game():
         logging.info('Policy: %s' % policy)
 
         time.sleep(max(0, result['wait'] / 1000))  # Wait until the next turn
+        t = time.time()
+
         verify, action_enemy, response = get_direction(count_turn, player_index)
         if verify == -1:
             logging.info(response['description'])
@@ -122,6 +123,7 @@ def play_game():
 
         printable_map = s[..., 0] + s[..., 1] * 2 + s[..., 2]
         logging.info('\n' + str(printable_map))
+        time_to_move = 1.1 - (time.time() - t)
 
 
 if __name__ == '__main__':

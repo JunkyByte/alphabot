@@ -202,7 +202,7 @@ def simulate_game(steps, alpha, INPUT_SIZE, pipe=None, ask_predict=None, process
         states.append(np.array(s))
         
         # Callbacks
-        if count_turn > INPUT_SIZE * 2:
+        if count_turn > INPUT_SIZE:
             tau = 1e-1
 
         if count_turn > INPUT_SIZE * 2:
