@@ -123,7 +123,7 @@ def play_game():
 
         printable_map = s[..., 0] + s[..., 1] * 2 + s[..., 2]
         logging.info('\n' + str(printable_map))
-        time_to_move = 1.1 - (time.time() - t)
+        time_to_move = 1.05 - (time.time() - t)
 
 
 if __name__ == '__main__':
